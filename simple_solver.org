@@ -1,0 +1,68 @@
+#+title: simple solver
+#+author: Jonathan Ulmer
+#+STARTUP: latexpreview
+#+LATEX_HEADER:  \input{$HOME/.doom.d/OrgConfig/noteHeader}
+#+bibliography: "~/org/resources/bibliography/refs.bib"
+
+* Idea:
+using Crank Nicholson method proposed in [cite:@SHIN20117441] and adapted to the constant mobility case \( M(\phi)= 1 \)
+\begin{align*}
+\frac{c_{i,j}^{n+1} - c_{ij}^n}{\Delta t} &= \Delta_d(\frac{1}{2}(W'(c^n_{i,j}) + W'(c^{n+1}_{ij})) + \frac{\gamma \varepsilon}{2}\Delta_d(c_{ij}^{n+1} + c_{ij}^n)))
+\end{align*}
+an implicit method may be defined as follows:
+
+\begin{align*}
+f_{ij}(x_{ij}) &=\frac{c_{i,j}^{n+1} - c_{ij}^n}{\Delta t} - \Delta_d(\frac{1}{2}(W'(c^n_{i,j}) + W'(c^{n+1}_{ij})) + \frac{\gamma \varepsilon}{2}\Delta_d(c_{ij}^{n+1} + c_{ij}^n))\\
+x_{ij} &= (c_{i,j}, c_{i+1,j+1},c_{i+1,j},c_{i,j+1},c_{i+2,j},c_{i,j+2},c_{i+1,j-1},c_{i-1,j+1})^T
+\end{align*}
+
+that results in a equation "\( f_{ij}(x_{ij})= 0 \)" with 8 unknown variables. To take them into account 7 more equations for already know points are used to solve a newton method in the following function:
+
+\begin{align*}
+F(x) =
+\left (
+\begin{array}{c}
+f_{ij}(x_{ij})   \\
+\dots\\
+f_{i-2,j-2}(x_{i-2,j-2})
+\end{array}
+\right )
+\end{align*}
+.
+
+currently I'm experimenting with computer algebra systems, to expand the \( \Delta_d \Delta_d   \) expressions and symbolically create the Jacoby matrices
+
+* 1D Example
+let \( x:= (x_1,x_2,x_3) \) be the vector used in a newton iteration to solve for \( c^{n+1}_i , c^{n+1}_{i+1}, c^{n+1}_{i+2} \)
+
+\begin{align*}
+
+ f_i(x) &= \frac{x_1 - c_{ij}^n}{\Delta t} - \Delta_d(\frac{1}{2}(W'(c^n_{i,j}) + W'(x_1)) + \frac{\gamma \varepsilon}{2}\Delta_d(x_1 + c_{ij}^n))\\
+ \quad   &= \frac{x_1 - c_{ij}^n}{\Delta t}\\
+&- \frac{W'(c^{n}_{i-1}) + W'(c^{n}_{i+1})-2W'(c^{n}_{i}) + W'(c^{n+1}_{i-1}) + W'(x_2)-2W'(x_1)}{2h^2}\\
+ &- \frac{\gamma\varepsilon}{2}\frac{c^{n}_{i-2}-4c^{n}_{i-1}+6c^{n}_{i}-4c^{n}_{i+1}+c^{n}_{i+2}+ c^{n+1}_{i-2}-4c^{n+1}_{i-1}+6x_1-4x_2+x_3}{h^2}
+\end{align*}
+then:
+\begin{align*}
+F(x) =
+\left (
+\begin{array}{c}
+f_i(x)\\
+f_{i-1}(c^{n+1}_{i-1},x_1,x_2) \\
+f_{i-2}(c^{n+1}_{i-2},c^{n+1}_{i-1},x_1)
+\end{array}
+\right )
+\end{align*}
+\begin{align*}
+DF(x)=
+\left (
+\begin{array}{ccc}
+\frac{x_1}{\Delta t} - \frac{-W''(x_1) + 3\gamma\varepsilon x_1  }{h^2} & -\frac{W''(x_2) -4x_2}{h^2} & \frac{\gamma\varepsilon}{2h^2} \\
+-(W''(x_1)) \dots
+\end{array}
+\right )
+\end{align*}
+
+
+* References
+#+LATEX: \printbibliography[heading = none]

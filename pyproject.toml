@@ -1,0 +1,21 @@
+[tool.poetry]
+name = "cahn-hillard-utils"
+version = "0.0.0"
+description = "Utility functions and Solvers for a simplified Cahn Hillard Equation for a b.sc thesis"
+authors = ["Jonathan Ulmer <jonathan.ulmer@ulmail.de>"]
+license = "Gpl"
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = ">=3.8, < 3.11"
+pyls= "*"
+numpy = "*"
+matplotlib = "*"
+tensorflow = "^2.12.0"
+python-language-server = "^0.36.2"
+python-lsp-server = "^1.7.4"
+jedi-language-server = "^0.3"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

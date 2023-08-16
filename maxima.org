@@ -1,0 +1,46 @@
+#+title: Maxima Test
+
+* Laplace Substitution
+#+begin_src maxima  :results drawer :exports both :tangle maxima.mac
+load("mactex-utilities");
+load("vect");
+declare(d , constant);
+Dx(x):=
+if atom(x) then x
+    elseif operatorp(x , "-") then -Dx(-x)
+    elseif operatorp(x , ["+", "*"]) then map(Dx , x)
+    else subvar(op(x),args(x)[1] + 1/2 , args(x)[2]) - subvar(op(x),args(x)[1]-1/2 , args(x)[2]);
+declare( Dx , additive );
+declare( Dx , oddfun );
+
+Dy(x):=
+    if atom(x) then x
+    elseif operatorp(x , "-") then -Dy(-x)
+    elseif operatorp(x , ["+", "*"]) then map(Dy , x)
+    else subvar(op(x),args(x)[1],   args(x)[2]+ 1/2) - subvar(op(x),args(x)[1],  args(x)[2]- 1/2);
+declare( Dy , additive );
+declare( Dy , oddfun );
+
+\Delta_d(x) := ratsimp( Dx(Dx(x)) + Dy(Dy(x)));
+prefix("\Delta_d");
+
+a : \Delta_d W[i,j];
+W[i,j] := W(u[i,j]);
+prefix("G");
+declare("G" , linear);
+
+L : matrix([\phi[i,j] / dt - G  \Delta_d \mu[i,j] , \epsilon^2 * G \Delta_d \phi[i,j] - 2 *\phi[i,j] + \mu[i,j]]);
+L : transpose(L);
+tex(L);
+#+end_src
+
+#+RESULTS:
+:results:
+$$\begin{pmatrix}-G\left(\mu_{i+1,j}\right)-G\left(\mu_{i,j+1}\right)
+ +4\,G\left(\mu_{i,j}\right)-G\left(\mu_{i,j-1}\right)+\frac{\varphi
+ _{i,j}}{{\it dt}}-G\left(\mu_{i-1,j}\right) \\ \varepsilon^2\,\left(
+ G\left(\varphi_{i+1,j}\right)+G\left(\varphi_{i,j+1}\right)-4\,G
+ \left(\varphi_{i,j}\right)+G\left(\varphi_{i,j-1}\right)+G\left(
+ \varphi_{i-1,j}\right)\right)-2\,\varphi_{i,j}+\mu_{i,j} \\
+ \end{pmatrix}$$
+:end:
