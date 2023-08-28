@@ -123,8 +123,10 @@ if __name__ == "__main__":
             [1, 2, 0, 4, 5, 6],
             [1, 0, 3, 4, 5, 6],
             [0, 2, 3, 4, 5, 6],
+        ]
+    )
 
-    a = np.array([1,2,3])
+    a = np.array([1, 2, 3])
     print(np.linalg.inv(matrix))
     np.round(matrix / matrix, 10)
     ch_solv: CN_CH_1D_Solver = CN_CH_1D_Solver(

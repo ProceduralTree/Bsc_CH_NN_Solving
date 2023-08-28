@@ -13,7 +13,6 @@ matplotlib = "*"
 tensorflow = "^2.12.0"
 
 [tool.poetry.dev-dependencies]
-python-language-server = "^0.36.2"
 python-lsp-server = "^1.7.4"
 pylsp-rope = "^0.1.11"
 pylsp-autoimport = "^0.1.0"
@@ -23,8 +22,6 @@ python-lsp-ruff = "^1.5.1"
 pylsp-mypy = "^0.6.7"
 debugpy = "^1.6.7"
 pyls-spyder = "^0.4.0"
-pyright = "^1.1.323"
-ruff-lsp = "^0.0.35"
 
 
 [build-system]

@@ -31,24 +31,22 @@ declare("G" , linear);
 
 L : matrix([\phi[i,j] / dt - G  \Delta_d \mu[i,j] , \epsilon^2 * G \Delta_d \phi[i,j] - 2 *\phi[i,j] + \mu[i,j]]);
 L : transpose(L);
-tex(L);
+zeta : L[1];
+psi : L[2];
+tex(psi);
 #+end_src
 
 #+RESULTS:
 :results:
-$$\begin{pmatrix}-G\left(\mu_{i+1,j}\right)-G\left(\mu_{i,j+1}\right)
- +4\,G\left(\mu_{i,j}\right)-G\left(\mu_{i,j-1}\right)+\frac{\varphi
- _{i,j}}{{\it dt}}-G\left(\mu_{i-1,j}\right) \\ \varepsilon^2\,\left(
- G\left(\varphi_{i+1,j}\right)+G\left(\varphi_{i,j+1}\right)-4\,G
- \left(\varphi_{i,j}\right)+G\left(\varphi_{i,j-1}\right)+G\left(
- \varphi_{i-1,j}\right)\right)-2\,\varphi_{i,j}+\mu_{i,j} \\
- \end{pmatrix}$$
+$$\left[ \varepsilon^2\,\left(G\left(\varphi_{i+1,j}\right)+G\left(
+ \varphi_{i,j+1}\right)-4\,G\left(\varphi_{i,j}\right)+G\left(\varphi
+ _{i,j-1}\right)+G\left(\varphi_{i-1,j}\right)\right)-2\,\varphi_{i,j
+ }+\mu_{i,j} \right] $$
 :end:
 
 * Smoothing operator matrix form:
 #+begin_src maxima  :results output drawer :outputs
 load("mactex-utilities");
-load(pytranslate);
 
 eq_1 : unk_\phi  / dt + bordernumber/h^2 * unk_\mu = \zeta + (G[i+1/2,j] * \mu[i+1,j] + G[i-1/2,j] * smooth_\mu[i-1,j])/h^2 + (G[i,j+1/2] * \mu[i,j+1/2] + G[i,j-1/2] * smooth_\mu[i,j-1])/h^2;
 res_1 : solve(eq_1 , \zeta);
@@ -56,9 +54,16 @@ eq_2 : -(\epsilon^2/h^2 * (gsum) + 2) * unk_\phi + unk_\mu  = \psi - \epsilon^2/
 res_2: solve(eq_2 , \psi);
 cmatrix : coefmatrix([lhs(eq_1) , lhs(eq_2)] , [unk_\phi , unk_\mu]);
 b : matrix([rhs(eq_1), rhs(eq_2)]);
-pytranslate(b);
+tex(b);
 #+end_src
 
 #+RESULTS:
 :results:
+$$\begin{pmatrix}\zeta+\frac{G_{i+\frac{1}{2},j}\,\mu_{i+1,j}+
+ {\it smooth\_mu}_{i-1,j}\,G_{i-\frac{1}{2},j}}{h^2}+\frac{G_{i,j+
+ \frac{1}{2}}\,\mu_{i,j+\frac{1}{2}}+{\it smooth\_mu}_{i,j-1}\,G_{i,j
+ -\frac{1}{2}}}{h^2} & \psi-\frac{\varepsilon^2\,\left(G_{i+\frac{1}{
+ 2},j}\,\varphi_{i+1,j}+G_{i,j+\frac{1}{2}}\,\varphi_{i,j+1}+
+ {\it smooth\_phi}_{i,j-1}\,G_{i,j-\frac{1}{2}}+{\it smooth\_phi}_{i-
+ 1,j}\,G_{i-\frac{1}{2},j}\right)}{h^2} \\ \end{pmatrix}$$
 :end:

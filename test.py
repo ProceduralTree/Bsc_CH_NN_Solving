@@ -5,6 +5,7 @@ import numpy as np
 
 
 class CH_2D_Multigrid_Solver:
+
     """
     Cahn Hillard solever based on the paper [[file:JCP.pdf]]
 
@@ -18,9 +19,9 @@ class CH_2D_Multigrid_Solver:
         phase field vallue on the large grid
     """
 
-    mu_large: np.nparray
-    mu_small: np.nparray
-    mu_smooth: np.nparray
+    mu_large: np.ndarray
+    mu_small: np.ndarray
+    mu_smooth: np.ndarray
     phase_smooth: np.ndarray
     phase_large: np.ndarray
     phase_small: np.ndarray
@@ -42,7 +43,6 @@ class CH_2D_Multigrid_Solver:
         j = 0
         bordernumber = 4
         gsum = 4
-
         coefmatrix = np.array(
             [
                 [1 / self.dt, bordernumber / self.h**2],
@@ -74,15 +74,21 @@ class CH_2D_Multigrid_Solver:
         res = np.linalg.solve(coefmatrix, b)
         return res
 
-    def __L(self) -> np.ndarray[(2, 1)]:
-        return np.zeros((2, 1))
+        def __L(self, phi: float, mu: float) -> np.ndarray[(2, 1)]:
+            zeta = (
+                -1 * self.__G() * self.mu_small[i + 1, j]
+                - self.__G() * self.mu_small[i, j + 1]
+                + self.__G() * 4 * mu
+                - self.__G() * self.mu_small[i, j - 1]
+                + self.__G() * self.mu_small[i - 1, j]
+                + phi / self.dt
+            )
+            psi = 1
+            return np.array([zeta, psi])
 
     def __v_cycle(self) -> None:
         pass
 
 
 if __name__ == "__main__":
-    for i in range(10):
-        print(i)
-
     solver: CH_2D_Multigrid_Solver = CH_2D_Multigrid_Solver()
