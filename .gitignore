@@ -1,6 +1,5 @@
 /.idea/
 *.bbl
-*.pdf
 *.tex
 /_minted-maxima/
 *.sync-conflict-*.*
