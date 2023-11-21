@@ -125,6 +125,40 @@ G_{ij} &=
 \end{cases}
 \end{align*}
 
+** tests:
+# setup plotting
+
+#+begin_src python :session :results silent
+
+import testUtils as tu
+import matplotlib.pyplot as plt
+import seaborn as sns
+sns.set_theme()
+#+end_src
+
+
+#+begin_src python :results file link  :file phase.png :session
+test_phase = tu.k_squares_phase(10, 5)
+plt.figure()
+sns.heatmap(test_phase)
+plt.savefig("phase.png")
+
+#+end_src
+
+#+RESULTS:
+[[file:phase.png]]
+
+#+begin_src python :results file link :file it_40.png :session :async
+solver = tu.setup_solver(test_phase)
+solver.solve(40,10)
+plt.figure()
+sns.heatmap(solver.phase_small)
+plt.savefig("it_40.png")
+#+end_src
+
+#+RESULTS:
+[[file:it_40.png]]
+
 * Relaxed Problem
 In effort to decrease the order of complexity, the following relaxation to the classical CH Equation is proposed:
 ** TODO relaxed operators:
