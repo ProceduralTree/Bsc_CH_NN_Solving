@@ -7,6 +7,7 @@ from scipy.spatial import Voronoi
 import random
 
 SIZE = 32
+SEED = 42
 
 
 def wprime(x: float):
@@ -14,7 +15,7 @@ def wprime(x: float):
 
 
 def random_phase() -> np.ndarray:
-    gen = Generator(PCG64(42))
+    gen = Generator(PCG64(SEED))
     return gen.choice([-1, 1], size=(SIZE, SIZE))
 
 
@@ -32,7 +33,7 @@ def setup_solver(test_phase) -> CH_2D_Multigrid_Solver:
 
 
 def k_squares_phase(k: int, diameter: int):
-    random.seed(42)
+    random.seed(SEED)
     points = [
         [random.randrange(SIZE - diameter), random.randrange(SIZE - diameter)]
         for i in range(k)
