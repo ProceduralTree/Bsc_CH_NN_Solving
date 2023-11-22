@@ -17,7 +17,7 @@ def test_phasefield() -> np.ndarray:
     return filter(ret)
 
 
-def test_phasefield_square() -> np.ndarray:
+def square_phase() -> np.ndarray:
     ret = np.ones((30, 30))
     ret = -1 * ret
     ones = np.ones((10, 10))
