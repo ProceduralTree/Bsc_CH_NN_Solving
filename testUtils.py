@@ -44,3 +44,35 @@ def k_squares_phase(k: int, diameter: int):
             (diameter, diameter)
         )
     return mat
+
+
+def k_spheres_phase(k: int, diameter: int):
+    random.seed(SEED)
+    points = [
+        [random.randrange(SIZE - diameter), random.randrange(SIZE - diameter)]
+        for i in range(k)
+    ]
+    pointv = np.array(points)
+    mat = np.zeros((SIZE, SIZE))
+    for i in range(SIZE):
+        for j in range(SIZE):
+            mat[i, j] = is_in_sphere(i, j, pointv, diameter)
+    return mat
+
+
+def sphere_phase(diameter):
+    points = np.array([[SIZE / 2, SIZE / 2]])
+    mat = np.zeros((SIZE, SIZE))
+    for i in range(SIZE):
+        for j in range(SIZE):
+            mat[i, j] = is_in_sphere(i, j, points, diameter)
+    return mat
+
+
+def is_in_sphere(i, j, points, diameter):
+    v = np.array([[i, j] for k in range(len(points))])
+    div = points - v
+    dists = [np.linalg.norm(x) for x in div]
+    return 1 if min(dists) < diameter else -1
+
+
