@@ -76,3 +76,10 @@ def is_in_sphere(i, j, points, diameter):
     return 1 if min(dists) < diameter else -1
 
 
+def generate_train_data(phasefield: np.ndarray, iterations: int, name: str):
+    solver = setup_solver(phasefield)
+    for i in range(iterations):
+        solver.solve(1, 100)
+        phase = solver.phase_small
+        np.save(f"data/{name}/iter_{i:03}")
+    pass
