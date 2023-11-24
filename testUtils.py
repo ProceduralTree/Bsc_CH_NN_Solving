@@ -23,7 +23,7 @@ def square_phase() -> np.ndarray:
     ret = np.ones((SIZE, SIZE))
     ret = -1 * ret
     ones = np.ones((10, 10))
-    ret[10:-10, 10:-10] = ones
+    ret[10:20, 10:20] = ones
     return ret
 
 
@@ -78,8 +78,13 @@ def is_in_sphere(i, j, points, diameter):
 
 def generate_train_data(phasefield: np.ndarray, iterations: int, name: str):
     solver = setup_solver(phasefield)
+    phases = []
+
+    print(f"Iterations: {iterations}")
     for i in range(iterations):
+        print(f"Iteration: {i}")
         solver.solve(1, 100)
-        phase = solver.phase_small
-        np.save(f"data/{name}/iter_{i:03}")
+        phases += [solver.phase_small]
+
+    np.save(f"data/{name}", phases)
     pass

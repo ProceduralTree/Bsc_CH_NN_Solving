@@ -25,7 +25,7 @@ def plot_solver(solver: CH_2D_Multigrid_Solver):
 
 
 def plot_anim_square(n: int):
-    solver = tu.setup_solver(tu.test_phasefield_square())
+    solver = tu.setup_solver(tu.square_phase())
 
     for i in range(n):
         solver.solve(1, 100)
@@ -37,7 +37,7 @@ def plot_anim_square(n: int):
 
 
 def plot_anim(n: int):
-    test_phase = tu.test_phasefield_square()
+    test_phase = tu.square_phase()
     solver = tu.setup_solver(test_phase)
     # fig = plt.figure()
     # animate = FuncAnimation(

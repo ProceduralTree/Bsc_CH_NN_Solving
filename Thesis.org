@@ -142,8 +142,9 @@ sns.set_theme()
 #+end_src
 
 #+header: :file images/phase.png
-#+begin_src python :results graphics file output :eval never-export :session :async
-test_phase = tu.k_squares_phase(10,10)
+#+begin_src python :results graphics file output :eval never-export :session
+tu.SEED = 13
+test_phase = tu.k_spheres_phase(9,3)
 plt.figure()
 sns.heatmap(test_phase)
 #+end_src
@@ -153,11 +154,10 @@ sns.heatmap(test_phase)
 
 
 #+header: :file images/phase2.png
-#+begin_src python :results graphics file output    :session  :eval never-export :async :exports results
-test_phase = tu.k_squares_phase(6, 10)
+#+begin_src python :results graphics file output    :session  :eval never-export :exports results
+test_phase = tu.k_squares_phase(8, 1)
 plt.figure()
 sns.heatmap(test_phase)
-
 #+end_src
 
 #+RESULTS:
@@ -166,15 +166,20 @@ sns.heatmap(test_phase)
 *** circles
 
 ** Tests
-#+begin_src python :results file graphics output :file it_40.png :session :async :eval never
+#+begin_src python :results file graphics output :file it_40.png :session  :eval never-export
+test_phase = tu.random_phase()
 solver = tu.setup_solver(test_phase)
-solver.solve(40,100)
+solver.solve(4,10)
 plt.figure()
 sns.heatmap(solver.phase_small)
 #+end_src
 
 #+RESULTS:
 [[file:it_40.png]]
+
+
+
+
 * Relaxed Problem
 In effort to decrease the order of complexity, the following relaxation to the classical CH Equation is proposed:
 ** TODO relaxed operators:
