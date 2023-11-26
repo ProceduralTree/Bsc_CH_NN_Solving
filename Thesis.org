@@ -16,6 +16,7 @@ where \( \phi\) is the so called phase field. Demarking the different states of 
 #    describing the width of the phase transition
 , and \( \mu\) is the chemical potential[cite:@Wu_2022]. While the Cahn Hillard exist in a more general form taking the fluids mobility \( M(\Phi) \) into account, we will assume \( M(\Phi) = 1 \), simplifying the CH-Equations used in[cite:@Wu_2022][cite:@SHIN20117441] to what is stated above.
 
+
 The Advantages of the Cahn Hillard Approach as compared to traditional fluid dynamics solvers are for example: "explicit tracking of the interface"[cite:@Wu_2022], as well as "evolution of complex geometries and topological changes [...] in a natural way"[cite:@Wu_2022]
 ** TODO Derivation from paper
 *** Free energy

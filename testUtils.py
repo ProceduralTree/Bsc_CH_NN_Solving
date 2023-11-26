@@ -3,7 +3,6 @@
 import numpy as np
 from multi_solver import CH_2D_Multigrid_Solver
 from numpy.random import Generator, PCG64
-from scipy.spatial import Voronoi
 import random
 
 SIZE = 32
