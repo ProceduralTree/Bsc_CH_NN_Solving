@@ -1,9 +1,11 @@
 #!/usr/bin/env python3
 
+
 import numpy as np
 from multi_solver import CH_2D_Multigrid_Solver
 from numpy.random import Generator, PCG64
 import random
+from multiprocessing import Lock, Process
 
 SIZE = 32
 SEED = 42
@@ -75,15 +77,31 @@ def is_in_sphere(i, j, points, diameter):
     return 1 if min(dists) < diameter else -1
 
 
-def generate_train_data(phasefield: np.ndarray, iterations: int, name: str):
+def generate_train_data(phasefield: np.ndarray, iterations: int, name: str, lock):
     solver = setup_solver(phasefield)
     phases = []
 
-    print(f"Iterations: {iterations}")
     for i in range(iterations):
-        print(f"Iteration: {i}")
         solver.solve(1, 100)
         phases += [solver.phase_small]
+    lock.accuire()
+    try:
+        np.save(f"data/{name}", phases)
+    finally:
+        lock.release()
 
-    np.save(f"data/{name}", phases)
+
+def gen_data():
+    lock = Lock()
+    dataset = [
+        (sphere_phase(10), 10, "sphere", lock),
+        (square_phase(), 10, "square", lock),
+    ]
+
+    # for k in range(10):
+    #    dataset += [(k_squares_phase(k, 10), 100, f"{k}_square", lock)]
+
+    for data in dataset:
+        Process(target=generate_train_data, args=data).start()
+
     pass
