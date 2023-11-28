@@ -8,7 +8,7 @@ sns.set_theme()
 path = "/home/proceduraltree/Projects/Bsc_CH_NN_Solving"
 
 
-def plot():
+def main():
     dataset = os.listdir(f"{path}/data/")
     dataset = [d.replace(".npy", "") for d in dataset]
     print(dataset)
@@ -24,3 +24,12 @@ def plot():
             plt.figure()
             sns.heatmap(data[i])
             plt.savefig(f"{path}/images/{d}/{d}_{i:03}.png")
+            plt.close("all")
+
+        os.system(
+            f"convert -layers OptimizePlus -delay 1x24 -quality 99 {path}/images/{d}/*.png -loop 0 {path}/images/{d}.gif"
+        )
+
+
+if __name__ == "__main__":
+    main()

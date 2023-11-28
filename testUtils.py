@@ -84,7 +84,7 @@ def generate_train_data(phasefield: np.ndarray, iterations: int, name: str, lock
     for i in range(iterations):
         solver.solve(1, 100)
         phases += [solver.phase_small]
-    lock.accuire()
+    lock.acquire()
     try:
         np.save(f"data/{name}", phases)
     finally:
@@ -94,12 +94,12 @@ def generate_train_data(phasefield: np.ndarray, iterations: int, name: str, lock
 def gen_data():
     lock = Lock()
     dataset = [
-        (sphere_phase(10), 10, "sphere", lock),
-        (square_phase(), 10, "square", lock),
+        (sphere_phase(10), 100, "sphere", lock),
+        (square_phase(), 100, "square", lock),
     ]
 
-    # for k in range(10):
-    #    dataset += [(k_squares_phase(k, 10), 100, f"{k}_square", lock)]
+    for k in range(10):
+        dataset += [(k_squares_phase(k, 10), 100, f"{k}_square", lock)]
 
     for data in dataset:
         Process(target=generate_train_data, args=data).start()
