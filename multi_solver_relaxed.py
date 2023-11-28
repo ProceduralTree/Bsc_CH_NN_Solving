@@ -1,101 +1,12 @@
-#!/usr/bin/env python3
-
-
-from numba import njit
 import numpy as np
-from typing import NamedTuple
+from numba import njit
+
 from typing import Tuple
+from multi_solver import Interpolate, Restrict, __G_h
 
 
 @njit
-def Interpolate(
-    array: np.ndarray, len_large, width_large, len_small, width_small
-) -> np.ndarray:
-    """
-    interpolates from large grid to small grid
-
-    Returns
-    -----------------------
-    interpolated array + padding
-    """
-    ret = np.zeros((len_small + 2, width_small + 2))
-
-    for i in range(1, len_large + 1):
-        for j in range(1, width_large + 1):
-            ret[2 * i - 1, 2 * j - 1] = (
-                __G_h(2 * i - 1, 2 * j - 1, len_small, width_small) * array[i, j]
-            )  # noqa: E501
-            ret[2 * i - 1, 2 * j] = (
-                __G_h(2 * i - 1, 2 * j, len_small, width_small) * array[i, j]
-            )
-            ret[2 * i, 2 * j - 1] = (
-                __G_h(2 * i, 2 * j - 1, len_small, width_small) * array[i, j]
-            )
-            ret[2 * i, 2 * j] = (
-                __G_h(2 * i, 2 * j, len_small, width_small) * array[i, j]
-            )
-
-    return ret
-
-
-@njit
-def Restrict(
-    array: np.ndarray, len_large, width_large, len_small, width_small
-) -> np.ndarray:
-    """
-    restricts an array on the small grid to an array in the large grid
-
-    Returns
-    ---------------------------
-    large grid array + padding
-    """
-    ret = np.zeros((len_large + 2, width_large + 2))
-    for i in range(1, len_large + 1):
-        for j in range(1, width_large + 1):
-            g: np.ndarray = np.array(
-                [
-                    __G_h(2 * i - 1, 2 * j - 1, len_small, width_small),
-                    __G_h(2 * i - 1, 2 * j, len_small, width_small),
-                    __G_h(2 * i, 2 * j - 1, len_small, width_small),
-                    __G_h(2 * i, 2 * j, len_small, width_small),
-                ],
-            )
-            if np.sum(g) == 0:
-                ret[i, j] = 0
-            else:
-                ret[i, j] = (
-                    1
-                    / np.sum(g)
-                    * g.dot(
-                        np.array(
-                            [
-                                array[2 * i - 1, 2 * j - 1],
-                                array[2 * i - 1, 2 * j],
-                                array[2 * i, 2 * j - 1],
-                                array[2 * i, 2 * j],
-                            ]
-                        )
-                    )
-                )
-    return ret
-
-
-@njit
-def __G_h(i, j, len_small, width_small) -> float:
-    """
-    small grid version
-
-    Returns
-    ---------------
-    1 if index i,j is in bounds(without padding) and 0 else
-    """
-    if 0 < i < len_small + 1 and 0 < j < width_small + 1:
-        return 1.0
-    return 0.0
-
-
-@njit
-def SMOOTH_jit(
+def SMOOTH_relaxed_njit(
     xi: np.ndarray,
     psi: np.ndarray,
     phase_small: np.ndarray,
@@ -157,14 +68,21 @@ def SMOOTH_jit(
                 )
 
                 res = np.linalg.solve(coefmatrix, b)
+                # xipi = (
+                #    self.L_h(i, j).A.dot(
+                #        np.array([self.phase_small[i, j], self.mu_small[i, j]])
+                #    )
+                #    + self.L_h(i, j).b
+                # )
+                # xi[i, j] = xipi[0]
+                # psi[i, j] = xipi[1]
+
                 phase_small[i, j] = res[0]
                 mu_small[i, j] = res[1]
 
     return (phase_small, mu_small)
 
 
-# TODO implement padding
-# @jitclass(spec=("W_prime", ))
 class CH_2D_Multigrid_Solver:
 
     """
