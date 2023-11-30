@@ -17,25 +17,41 @@ def SMOOTH_relaxed_njit(
     len_small: int,
     width_small: int,
     v: int,
+    alpha: float,
 ) -> Tuple[np.ndarray, np.ndarray]:
     for k in range(v):
         for i in range(1, len_small + 1):
             for j in range(1, width_small + 1):
+                y = (
+                    lambda x: x * dt**-1
+                    - xi
+                    - h**-2
+                    * (
+                        __G_h(i + 0.5, j, len_small, width_small) * mu_small[i + 1, j]
+                        + __G_h(i - 0.5, j, len_small, width_small) * mu_small[i - 1, j]
+                        + __G_h(i, j + 0.5, len_small, width_small) * mu_small[i, j + 1]
+                        + __G_h(i, j - 0.5, len_small, width_small) * mu_small[i, j - 1]
+                    )
+                    * (
+                        __G_h(i + 0.5, j, len_small, width_small)
+                        + __G_h(i - 0.5, j, len_small, width_small)
+                        + __G_h(i, j + 0.5, len_small, width_small)
+                        + __G_h(i, j - 0.5, len_small, width_small)
+                    )
+                    ** -1
+                )
+                F = (
+                    lambda x: epsilon**2 * x**alpha
+                    + 2 * x
+                    - epsilon**2 * c**alpha
+                    + y(x)
+                    + psi
+                )
                 bordernumber = (
                     __G_h(i + 0.5, j, len_small, width_small)
                     + __G_h(i - 0.5, j, len_small, width_small)
                     + __G_h(i, j + 0.5, len_small, width_small)
                     + __G_h(i, j - 0.5, len_small, width_small)
-                )
-                gsum = bordernumber
-                coefmatrix = np.array(
-                    [
-                        [1 / dt, bordernumber / h**2],
-                        [
-                            -1 * (2 + (epsilon**2 / h**2) * gsum),
-                            1,
-                        ],
-                    ]
                 )
 
                 b = np.array(
