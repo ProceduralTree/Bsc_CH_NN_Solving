@@ -106,8 +106,11 @@ def SMOOTH_jit(
     len_small: int,
     width_small: int,
     v: int,
+    verbose: bool = False,
 ) -> Tuple[np.ndarray, np.ndarray]:
     for k in range(v):
+        if verbose:
+            np.savez(f".data/SMOOTH/SMOOTH_it{k:03}", phi=phase_small, mu=mu_small)
         for i in range(1, len_small + 1):
             for j in range(1, width_small + 1):
                 bordernumber = (
@@ -413,6 +416,7 @@ class CH_2D_Multigrid_Solver:
 
         dr = np.zeros((self.len_small + 2, self.width_small + 2, 2))
 
+        # TODO check array indicies
         dr[1:-1, 1:-1, :] = np.array(
             [
                 [

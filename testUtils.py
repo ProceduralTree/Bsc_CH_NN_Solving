@@ -3,6 +3,7 @@
 
 import numpy as np
 from multi_solver import CH_2D_Multigrid_Solver
+from multi_solver import SMOOTH_jit
 from numpy.random import Generator, PCG64
 import random
 from multiprocessing import Lock, Process
@@ -104,4 +105,13 @@ def gen_data():
     for data in dataset:
         Process(target=generate_train_data, args=data).start()
 
+    pass
+
+
+def benchmark_solver(phase: np.ndarray, mu: np.ndarray):
+    solver = setup_solver(phase)
+    solver.mu_small = mu
+    solver.phase_small = phase
+    solver.set_xi_and_psi()
+    SMOOTH_jit(solver.xi, solver.psi, solver.phase_small, solver.mu_small)
     pass
