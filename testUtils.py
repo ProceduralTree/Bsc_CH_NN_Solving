@@ -85,7 +85,7 @@ def generate_train_data(
     mus = []
 
     for i in range(iterations):
-        solver.solve(1, 100)
+        solver.solve(1, 10)
         phases += [solver.phase_small]
         mus += [solver.mu_small]
     lock.acquire()

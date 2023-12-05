@@ -457,8 +457,8 @@ class CH_2D_Multigrid_Solver:
                 u_large[i, j] = u
                 v_large[i, j] = v
 
-        print(f"Max derivation u: {np.linalg.norm(u_large)}")
-        print(f"Max derivation v: {np.linalg.norm(v_large)}")
+        # print(f"Max derivation u: {np.linalg.norm(u_large)}")
+        # print(f"Max derivation v: {np.linalg.norm(v_large)}")
 
         u_small = self.__Interpolate(u_large)
         v_small = self.__Interpolate(v_large)

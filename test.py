@@ -37,7 +37,7 @@ def gen_data() -> None:
     ]
 
     for k in range(10):
-        dataset += [(tu.k_squares_phase(k, 10), 100, f"{k}_square", lock)]
+        dataset += [(tu.k_squares_phase(k, 10), 10, f"{k}_square", lock)]
 
     for data in dataset:
         Process(target=tu.generate_train_data, args=data).start()

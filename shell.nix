@@ -9,6 +9,7 @@ let
       numpy
       seaborn
       scipy
+      pydantic
 
       # Dev  deps
       python-lsp-server
