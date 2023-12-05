@@ -6,13 +6,12 @@ from multi_solver import CH_2D_Multigrid_Solver
 from multi_solver import SMOOTH_jit
 from numpy.random import Generator, PCG64
 import random
-from multiprocessing import Lock, Process
 
 SIZE = 32
 SEED = 42
 
 
-def wprime(x: float):
+def wprime(x: float) -> float:
     return -x * (1 - x**2)
 
 
@@ -78,40 +77,19 @@ def is_in_sphere(i, j, points, diameter):
     return 1 if min(dists) < diameter else -1
 
 
-def generate_train_data(phasefield: np.ndarray, iterations: int, name: str, lock):
+def generate_train_data(
+    phasefield: np.ndarray, iterations: int, name: str, lock
+) -> None:
     solver = setup_solver(phasefield)
     phases = []
+    mus = []
 
     for i in range(iterations):
         solver.solve(1, 100)
         phases += [solver.phase_small]
+        mus += [solver.mu_small]
     lock.acquire()
     try:
-        np.save(f"data/{name}", phases)
+        np.savez(f"data/{name}", phase=phases, mu=mus)
     finally:
         lock.release()
-
-
-def gen_data():
-    lock = Lock()
-    dataset = [
-        (sphere_phase(10), 100, "sphere", lock),
-        (square_phase(), 100, "square", lock),
-    ]
-
-    for k in range(10):
-        dataset += [(k_squares_phase(k, 10), 100, f"{k}_square", lock)]
-
-    for data in dataset:
-        Process(target=generate_train_data, args=data).start()
-
-    pass
-
-
-def benchmark_solver(phase: np.ndarray, mu: np.ndarray):
-    solver = setup_solver(phase)
-    solver.mu_small = mu
-    solver.phase_small = phase
-    solver.set_xi_and_psi()
-    SMOOTH_jit(solver.xi, solver.psi, solver.phase_small, solver.mu_small)
-    pass

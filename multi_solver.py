@@ -2,9 +2,11 @@
 
 
 from numba import njit
+from numba.experimental import jitclass
 import numpy as np
-from typing import NamedTuple
-from typing import Tuple
+from numpy.typing import NDArray
+
+from typing import Tuple, NamedTuple, Any
 
 
 @njit
@@ -98,7 +100,7 @@ def __G_h(i, j, len_small, width_small) -> float:
 def SMOOTH_jit(
     xi: np.ndarray,
     psi: np.ndarray,
-    phase_small: np.ndarray,
+    phase_small: np.ndarray,  # noqa: type-arg
     mu_small: np.ndarray,
     epsilon: float,
     h: float,
@@ -106,11 +108,8 @@ def SMOOTH_jit(
     len_small: int,
     width_small: int,
     v: int,
-    verbose: bool = False,
 ) -> Tuple[np.ndarray, np.ndarray]:
     for k in range(v):
-        if verbose:
-            np.savez(f".data/SMOOTH/SMOOTH_it{k:03}", phi=phase_small, mu=mu_small)
         for i in range(1, len_small + 1):
             for j in range(1, width_small + 1):
                 bordernumber = (
@@ -167,7 +166,7 @@ def SMOOTH_jit(
 
 
 # TODO implement padding
-# @jitclass(spec=("W_prime", ))
+# @jitclass
 class CH_2D_Multigrid_Solver:
 
     """
@@ -458,8 +457,8 @@ class CH_2D_Multigrid_Solver:
                 u_large[i, j] = u
                 v_large[i, j] = v
 
-        # print(f"Max derivation u: {np.linalg.norm(u_large)}")
-        # print(f"Max derivation v: {np.linalg.norm(v_large)}")
+        print(f"Max derivation u: {np.linalg.norm(u_large)}")
+        print(f"Max derivation v: {np.linalg.norm(v_large)}")
 
         u_small = self.__Interpolate(u_large)
         v_small = self.__Interpolate(v_large)
