@@ -1,0 +1,13 @@
+#+title: Tasks
+
+* TODO Enable adaptive SMOOTH operation
+
+* TODO Data gen for training
+
+* TODO write elyptical PDE solver
+
+* TODO finish relaxed adapdtations
+
+* TODO check v_cycle implementation
+
+* TODO test errors
