@@ -164,8 +164,9 @@ plt.figure()
 sns.heatmap(test_phase)
 #+end_src
 
-#+RESULTS:
+#+RESULTS: points
 [[file:images/phase2.png]]
+
 
 
 *** circles
