@@ -10,7 +10,7 @@
 Partial Differential Equation (PDE) solving the state of a 2 Phase Fluid[cite:@Wu_2022]. The form of the Cahn Hillard Equation used for the remainder of this thesis is:
 \begin{align}
 \phi _t(x,t) &=  \Delta  \mu \\
-\mu &= - \varepsilon^2 \Delta \Phi  + W'(\Phi
+\mu &= - \varepsilon^2 \Delta \phi   + W'(\phi)
 \end{align}
 where \( \phi\) is the so called phase field. Demarking the different states of the fluids through an Interval \( I=[-1,1] \) and where \( \partial I = \{-1,1\} \)  represents full state of one fluid. \( \varepsilon > 0  \) is  a positive constant
 #    describing the width of the phase transition
@@ -22,9 +22,9 @@ The Advantages of the Cahn Hillard Approach as compared to traditional fluid dyn
 *** Free energy
 The Cahn Hillard Equations can be motivated Using a *Ginzburg Landau* type free energy equation:
 \begin{align*}
-E^{\text{bulk}}  = \int_{  \Omega}  \frac{\varepsilon^2}{2} |\nabla \phi |^2 + F(\phi) \,dx
+E^{\text{bulk}}  = \int_{  \Omega}  \frac{\varepsilon^2}{2} |\nabla \phi |^2 + W(\phi) \,dx
 \end{align*}
-where "\( F(\phi) \)  denotes the (Helmholtz) free energy density of mixing.""[cite:@Wu_2022] and will be approximated in further calculations as \( F(\phi) = \frac{(1-\phi ^2)^2}{4}\) as used in[cite:@SHIN20117441]
+where \( W(\phi) \)  denotes the (Helmholtz) free energy density of mixing.""[cite:@Wu_2022] and will be approximated in further calculations as \( W(\phi) = \frac{(1-\phi ^2)^2}{4}\) as used in[cite:@SHIN20117441]
 
 The chemical potential then follows as derivative of Energy in respect to time.
 \begin{align*}
@@ -144,17 +144,15 @@ sns.set_theme()
 
 #+name: dots
 #+header: :file images/phase.png
-#+begin_src python :results graphics file output :eval never-export :session :wrap \subfigure
-tu.SEED = 13
+#+begin_src python :results graphics file output :eval never-export :session
+tu.SEED = 69
 test_phase = tu.k_spheres_phase(5,6)
 plt.figure()
 sns.heatmap(test_phase)
 #+end_src
 
 #+RESULTS: dots
-#+begin_\subfigure
 [[file:images/phase.png]]
-#+end_\subfigure
 
 
 
@@ -177,11 +175,11 @@ sns.heatmap(test_phase)
 #+begin_src python :session :async :eval never-export :results results
 test_phase = tu.k_spheres_phase(4,7)
 solver = tu.setup_solver(test_phase)
-solver.solve(4,10)
+solver.solve(4,100)
 #+end_src
 
 #+RESULTS:
-: /tmp/babel-F6hNld/python-PPX6WG
+: None
 
 #+begin_src python :results file graphics output :file it_40.png :session  :eval never-export
 plt.figure()
@@ -189,10 +187,19 @@ sns.heatmap(solver.phase_small)
 #+end_src
 
 #+RESULTS:
-[]
+[[file:it_40.png]]
 
 * Relaxed Problem
 In effort to decrease the order of complexity, the following relaxation to the classical CH Equation is proposed:
+\begin{align*}
+\partial_t \phi  &= \Delta \mu \\
+\mu &= \varepsilon ^2(c^\alpha - \phi^\alpha) + W'(\phi)
+\end{align*}
+where \( c \) is the solution of the following elliptical PDE
+\begin{align*}
+- \Delta c^\alpha  + \alpha c^a &= \alpha \phi ^\alpha
+\end{align*}
+
 ** TODO relaxed operators:
 *** L Relaxed
 \begin{align*}
@@ -241,19 +248,21 @@ And the derivative for the iteration is
 
 ** Elliptical PDE:
 on order to solve the relaxed CH Equation the following PDE as to be solved in Each additional time step:
-\begin{align*}
-- \Delta c^\alpha  + \alpha c^a &= \alpha \phi ^\alpha
-\end{align*}
 or in terms of the characteristic function:
 \begin{align*}
 - \nabla \cdot  (G \nabla c^\alpha) + \alpha c^\alpha  = \alpha \phi ^\alpha
 \end{align*}
 
-*** Discretisation
-
+*** Discretization
+Discretization of the PDE
 \begin{align*}
-- \nabla_d \cdot  (G_{ij} \nabla c_{ij}^\alpha) + \alpha  c_{ij}^\alpha &= \alpha \phi_{ij}^\alpha \\
-- (\frac{1}{h}(G_{i+\frac{1}{2}j} \nabla c^\alpha_{i+\frac{1}{2}j} + G_{ij+\frac{1}{2}} \nabla c^\alpha_{ij+\frac{1}{2}}))  &= \alpha  \phi_{ij}^\alpha \\
+- \nabla_d \cdot  (G_{ij} \nabla_d c_{ij}^\alpha) + \alpha  c_{ij}^\alpha &= \alpha \phi_{ij}^\alpha \\
+- (\frac{1}{h}(G_{i+\frac{1}{2}j} \nabla c^\alpha_{i+\frac{1}{2}j} + G_{ij+\frac{1}{2}} \nabla c^\alpha_{ij+\frac{1}{2}}) &  \\
+- (G_{i-\frac{1}{2}j} \nabla c^\alpha_{i-\frac{1}{2}j} + G_{ij-\frac{1}{2}} \nabla c^\alpha_{ij-\frac{1}{2}})) + \alpha  c_{ij}^\alpha   &= \alpha  \phi_{ij}^\alpha \\
+\frac{1}{h^2} ( G_{i+\frac{1}{2}j}(c_{i+1j}^\alpha - c_{ij}^\alpha) & \\
++G_{ij+\frac{1}{2}}(c_{ij+1}^\alpha - c_{ij}^\alpha) &\\
++G_{i-\frac{1}{2}j}(c_{i-1j}^\alpha - c_{ij}^\alpha)&\\
++G_{ij-\frac{1}{2}}(c_{ij-1}^\alpha - c_{ij}^\alpha))&=\alpha  \phi_{ij}^\alpha \\
 \end{align*}
 
 
