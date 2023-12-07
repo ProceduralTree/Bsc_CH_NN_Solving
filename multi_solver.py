@@ -108,8 +108,10 @@ def SMOOTH_jit(
     len_small: int,
     width_small: int,
     v: int,
+    adaptive: bool = True,
 ) -> Tuple[np.ndarray, np.ndarray]:
     for k in range(v):
+        old_phase = phase_small
         for i in range(1, len_small + 1):
             for j in range(1, width_small + 1):
                 bordernumber = (
@@ -161,6 +163,9 @@ def SMOOTH_jit(
                 res = np.linalg.solve(coefmatrix, b)
                 phase_small[i, j] = res[0]
                 mu_small[i, j] = res[1]
+
+        if adaptive and np.linalg.norm(old_phase - phase_small) < 1e-5:
+            break
 
     return (phase_small, mu_small)
 
@@ -285,6 +290,7 @@ class CH_2D_Multigrid_Solver:
             self.len_small,
             self.width_small,
             v,
+            adaptive=True,
         )
         pass
 
