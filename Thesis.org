@@ -145,7 +145,7 @@ sns.set_theme()
 #+header: :file images/phase.png
 #+begin_src python :results graphics file output :eval never-export :session
 tu.SEED = 13
-test_phase = tu.k_spheres_phase(4,4)
+test_phase = tu.k_spheres_phase(4,5)
 plt.figure()
 sns.heatmap(test_phase)
 #+end_src
@@ -167,10 +167,16 @@ sns.heatmap(test_phase)
 *** circles
 
 ** Tests
-#+begin_src python :results file graphics output :file it_40.png :session  :eval never-export
-test_phase = tu.random_phase()
+#+begin_src python :session :async :eval never-export :results results
+test_phase = tu.k_spheres_phase(4,7)
 solver = tu.setup_solver(test_phase)
 solver.solve(4,10)
+#+end_src
+
+#+RESULTS:
+: None
+
+#+begin_src python :results file graphics output :file it_40.png :session  :eval never-export
 plt.figure()
 sns.heatmap(solver.phase_small)
 #+end_src
@@ -227,6 +233,23 @@ And the derivative for the iteration is
 \begin{align*}
 \frac{d}{dx} F(x)&= \alpha \varepsilon^2 x^{\alpha-1} + 2 + \frac{d}{dx} y  \\
 \frac{d}{dx} y  &= \frac{1}{\Delta t}
+\end{align*}
+
+** Elliptical PDE:
+on order to solve the relaxed CH Equation the following PDE as to be solved in Each additional time step:
+\begin{align*}
+- \Delta c^\alpha  + \alpha c^a &= \alpha \phi ^\alpha
+\end{align*}
+or in terms of the characteristic function:
+\begin{align*}
+- \nabla \cdot  (G \nabla c^\alpha) + \alpha c^\alpha  = \alpha \phi ^\alpha
+\end{align*}
+
+*** Discretisation
+
+\begin{align*}
+- \nabla_d \cdot  (G_{ij} \nabla c_{ij}^\alpha) + \alpha  c_{ij}^\alpha &= \alpha \phi_{ij}^\alpha \\
+- (\frac{1}{h}(G_{i+\frac{1}{2}j} \nabla c^\alpha_{i+\frac{1}{2}j} + G_{ij+\frac{1}{2}} \nabla c^\alpha_{ij+\frac{1}{2}}))  &= \alpha  \phi_{ij}^\alpha \\
 \end{align*}
 
 

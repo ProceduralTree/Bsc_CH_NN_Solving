@@ -1,6 +1,8 @@
 import numpy as np
 from numba import njit
 
+import scipy.optimize as sp
+
 from typing import Tuple
 from multi_solver import Interpolate, Restrict, __G_h
 
@@ -22,9 +24,9 @@ def SMOOTH_relaxed_njit(
     for k in range(v):
         for i in range(1, len_small + 1):
             for j in range(1, width_small + 1):
-                y = (
+                y = np.vectorize(
                     lambda x: x * dt**-1
-                    - xi
+                    - xi[i, j]
                     - h**-2
                     * (
                         __G_h(i + 0.5, j, len_small, width_small) * mu_small[i + 1, j]
@@ -40,61 +42,22 @@ def SMOOTH_relaxed_njit(
                     )
                     ** -1
                 )
-                F = (
+                F = np.vectorize(
                     lambda x: epsilon**2 * x**alpha
                     + 2 * x
-                    - epsilon**2 * c**alpha
+                    - epsilon**2 * c[i, j] ** alpha
                     + y(x)
-                    + psi
-                )
-                bordernumber = (
-                    __G_h(i + 0.5, j, len_small, width_small)
-                    + __G_h(i - 0.5, j, len_small, width_small)
-                    + __G_h(i, j + 0.5, len_small, width_small)
-                    + __G_h(i, j - 0.5, len_small, width_small)
+                    + psi[i, j]
                 )
 
-                b = np.array(
-                    [
-                        xi[i, j]
-                        + (
-                            __G_h(i + 0.5, j, len_small, width_small)
-                            * mu_small[i + 1, j]
-                            + __G_h(i - 0.5, j, len_small, width_small)
-                            * mu_small[i - 1, j]
-                            + __G_h(i, j + 0.5, len_small, width_small)
-                            * mu_small[i, j + 1]
-                            + __G_h(i, j - 0.5, len_small, width_small)
-                            * mu_small[i, j - 1]
-                        )
-                        / h**2,
-                        psi[i, j]
-                        - (epsilon**2 / h**2)
-                        * (
-                            __G_h(i + 0.5, j, len_small, width_small)
-                            * phase_small[i + 1, j]
-                            + __G_h(i - 0.5, j, len_small, width_small)
-                            * phase_small[i - 1, j]
-                            + __G_h(i, j + 0.5, len_small, width_small)
-                            * phase_small[i, j + 1]
-                            + __G_h(i, j - 0.5, len_small, width_small)
-                            * phase_small[i, j - 1]
-                        ),
-                    ]
+                dF = np.vectorize(
+                    lambda x: alpha * epsilon**2 * x ** (alpha - 1) + 2 + dt**-1
                 )
 
-                res = np.linalg.solve(coefmatrix, b)
-                # xipi = (
-                #    self.L_h(i, j).A.dot(
-                #        np.array([self.phase_small[i, j], self.mu_small[i, j]])
-                #    )
-                #    + self.L_h(i, j).b
-                # )
-                # xi[i, j] = xipi[0]
-                # psi[i, j] = xipi[1]
+                root = sp.newton(F, phase_small[i, j], dF)
 
-                phase_small[i, j] = res[0]
-                mu_small[i, j] = res[1]
+                phase_small[i, j] = root
+                mu_small[i, j] = y(root)
 
     return (phase_small, mu_small)
 

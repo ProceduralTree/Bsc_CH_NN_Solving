@@ -5,6 +5,7 @@ from numba import njit
 from numba.experimental import jitclass
 import numpy as np
 from numpy.typing import NDArray
+from tqdm import trange
 
 from typing import Tuple, NamedTuple, Any
 
@@ -108,8 +109,10 @@ def SMOOTH_jit(
     len_small: int,
     width_small: int,
     v: int,
+    adaptive: bool = True,
 ) -> Tuple[np.ndarray, np.ndarray]:
     for k in range(v):
+        old_phase = phase_small
         for i in range(1, len_small + 1):
             for j in range(1, width_small + 1):
                 bordernumber = (
@@ -161,6 +164,9 @@ def SMOOTH_jit(
                 res = np.linalg.solve(coefmatrix, b)
                 phase_small[i, j] = res[0]
                 mu_small[i, j] = res[1]
+
+        if adaptive and np.linalg.norm(old_phase - phase_small) < 1e-10:
+            break
 
     return (phase_small, mu_small)
 
@@ -243,7 +249,6 @@ class CH_2D_Multigrid_Solver:
         Domainsize: {self.phase_large.shape} points\n
         Epsilon:    {self.epsilon}\n
         ----------------------\n
-
         """
 
     def __G_h(self, i, j):
@@ -285,6 +290,7 @@ class CH_2D_Multigrid_Solver:
             self.len_small,
             self.width_small,
             v,
+            adaptive=True,
         )
         pass
 
@@ -388,94 +394,78 @@ class CH_2D_Multigrid_Solver:
 
         return self.LinOp(coeffmatrix, b)
 
-    def v_cycle(self) -> None:
-        # init xi , psi
-        # rewrite: smooth all before further processing
+    def v_cycle(self, iterations: int) -> None:
+        for i in range(iterations):
+            old_phase = self.phase_small
+            self.SMOOTH(40)
 
-        # xipsi = np.zeros((self.len_small + 2, self.width_small + 2, 2))
+            # extract (d,r) as array operations
 
-        # xipsi[1:-1, 1:-1] = np.array(
-        #    [
-        #        [
-        #            self.L_h(i, j).A.dot(
-        #                np.array([self.phase_small[i, j], self.mu_small[i, j]])
-        #                + self.L_h(i, j).b
-        #            )
-        #            for i in range(1, self.len_small + 1)
-        #        ]
-        #        for j in range(1, self.width_small + 1)
-        #    ]
-        # )
+            dr = np.zeros((self.len_small + 2, self.width_small + 2, 2))
 
-        # TODO more (v_1,v_2) smoothing steps
-        self.SMOOTH(40)
-
-        # extract (d,r) as array operations
-        #
-
-        dr = np.zeros((self.len_small + 2, self.width_small + 2, 2))
-
-        # TODO check array indicies
-        dr[1:-1, 1:-1, :] = np.array(
-            [
+            # TODO check array indicies
+            dr[1:-1, 1:-1, :] = np.array(
                 [
-                    np.array([self.xi[i, j], self.psi[i, j]])
-                    - self.L_h(i, j).A.dot(
-                        np.array([self.phase_small[i, j], self.mu_small[i, j]])
-                    )
-                    - self.L_h(i, j).b
-                    for j in range(1, self.width_small + 1)
+                    [
+                        np.array([self.xi[i, j], self.psi[i, j]])
+                        - self.L_h(i, j).A.dot(
+                            np.array([self.phase_small[i, j], self.mu_small[i, j]])
+                        )
+                        - self.L_h(i, j).b
+                        for j in range(1, self.width_small + 1)
+                    ]
+                    for i in range(1, self.len_small + 1)
                 ]
-                for i in range(1, self.len_small + 1)
-            ]
-        )
-        d = dr[:, :, 0]
-        r = dr[:, :, 1]
+            )
+            d = dr[:, :, 0]
+            r = dr[:, :, 1]
 
-        # print(f"Max derivation d: {np.linalg.norm(d)}")
-        # print(f"Max derivation r: {np.linalg.norm(r)}")
-        d_H = self.__Restrict(d)
-        r_H = self.__Restrict(r)
-        self.phase_large = self.__Restrict(self.phase_small)
-        self.mu_large = self.__Restrict(self.mu_small)
+            # print(f"Max derivation d: {np.linalg.norm(d)}")
+            # print(f"Max derivation r: {np.linalg.norm(r)}")
+            d_H = self.__Restrict(d)
+            r_H = self.__Restrict(r)
+            self.phase_large = self.__Restrict(self.phase_small)
+            self.mu_large = self.__Restrict(self.mu_small)
 
-        u_large = np.zeros((self.len_large + 2, self.width_large + 2))
-        v_large = np.zeros((self.len_large + 2, self.width_large + 2))
+            u_large = np.zeros((self.len_large + 2, self.width_large + 2))
+            v_large = np.zeros((self.len_large + 2, self.width_large + 2))
 
-        # solve for phi^ mu^ with L
-        for i in range(1, self.len_large + 1):
-            for j in range(1, self.width_large + 1):
-                [A, c] = self.__L_H(i, j)
-                approx = np.linalg.solve(
-                    A,
-                    A.dot(np.array([self.phase_large[i, j], self.mu_large[i, j]]))
-                    + np.array([d_H[i, j], r_H[i, j]]),
-                )
-                [u, v] = approx - np.array(
-                    [self.phase_large[i, j], self.mu_large[i, j]]
-                )
-                u_large[i, j] = u
-                v_large[i, j] = v
+            # solve for phi^ mu^ with L
+            for i in range(1, self.len_large + 1):
+                for j in range(1, self.width_large + 1):
+                    [A, c] = self.__L_H(i, j)
+                    approx = np.linalg.solve(
+                        A,
+                        A.dot(np.array([self.phase_large[i, j], self.mu_large[i, j]]))
+                        + np.array([d_H[i, j], r_H[i, j]]),
+                    )
+                    [u, v] = approx - np.array(
+                        [self.phase_large[i, j], self.mu_large[i, j]]
+                    )
+                    u_large[i, j] = u
+                    v_large[i, j] = v
 
-        # print(f"Max derivation u: {np.linalg.norm(u_large)}")
-        # print(f"Max derivation v: {np.linalg.norm(v_large)}")
+            # print(f"Max derivation u: {np.linalg.norm(u_large)}")
+            # print(f"Max derivation v: {np.linalg.norm(v_large)}")
 
-        u_small = self.__Interpolate(u_large)
-        v_small = self.__Interpolate(v_large)
+            u_small = self.__Interpolate(u_large)
+            v_small = self.__Interpolate(v_large)
 
-        self.phase_small = self.phase_small + u_small
-        self.mu_small = self.mu_small + v_small
-        # smooth again:
-        self.SMOOTH(80)
-        # print("\n")
+            self.phase_small = self.phase_small + u_small
+            self.mu_small = self.mu_small + v_small
+            # smooth again:
+            self.SMOOTH(80)
 
+            # print(f"change in phase: {np.linalg.norm(old_phase - self.phase_small)}")
+            if np.linalg.norm(old_phase - self.phase_small) < 1e-4:
+                break
         pass
 
-    def solve(self, iterations: int, iteration_depth: int):
-        for i in range(iterations):
+    def solve(self, iterations: int, iteration_depth: int) -> None:
+        for i in trange(iterations):
             self.set_xi_and_psi()
-            for j in range(iteration_depth):
-                self.v_cycle()
+            self.v_cycle(iteration_depth)
+        pass
 
     def set_xi_and_psi(self):
         self.xi[1:-1, 1:-1] = np.array(
