@@ -145,7 +145,7 @@ sns.set_theme()
 #+header: :file images/phase.png
 #+begin_src python :results graphics file output :eval never-export :session
 tu.SEED = 13
-test_phase = tu.k_spheres_phase(4,4)
+test_phase = tu.k_spheres_phase(4,5)
 plt.figure()
 sns.heatmap(test_phase)
 #+end_src
@@ -167,10 +167,18 @@ sns.heatmap(test_phase)
 *** circles
 
 ** Tests
-#+begin_src python :results file graphics output :file it_40.png :session  :eval never-export
-test_phase = tu.random_phase()
+#+begin_src python :session :async :eval never-export :results results
+test_phase = tu.k_spheres_phase(4,7)
 solver = tu.setup_solver(test_phase)
 solver.solve(4,10)
+solver.set_xi_and_psi()
+#+end_src
+
+#+RESULTS:
+: 100% 4/4 [00:13<00:00,  3.32s/it]
+
+#+begin_src python :results file graphics output :file it_40.png :session  :eval never-export
+solver.SMOOTH(10000)
 plt.figure()
 sns.heatmap(solver.phase_small)
 #+end_src
