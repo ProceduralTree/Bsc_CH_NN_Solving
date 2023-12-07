@@ -26,6 +26,10 @@ def test_smooth(n):
 
 
 def main() -> None:
+    data = np.load("data/4_square.npz")
+    phases = data["phase"]
+    mus = data["mu"]
+    benchmark_SMOOTH(phases[9], mus[9])
     pass
 
 
@@ -46,7 +50,9 @@ def gen_data() -> None:
 
 
 def benchmark_SMOOTH(phase: np.ndarray, mu: np.ndarray) -> None:
-    solver = tu.setup_solver(phase)
+    solver = tu.setup_solver(
+        np.zeros((int(phase.shape[0] / 2 - 2), int(phase.shape[1] / 2 - 2)))
+    )
     solver.mu_small = mu
     solver.phase_small = phase
     smooth_progress = []
@@ -60,8 +66,8 @@ def benchmark_SMOOTH(phase: np.ndarray, mu: np.ndarray) -> None:
             solver.epsilon,
             solver.h,
             solver.dt,
-            solver.len_small,
-            solver.width_small,
+            solver.len_small - 2,
+            solver.width_small - 2,
             1,
         )
         smooth_progress += [phase]

@@ -5,30 +5,35 @@ import seaborn as sns
 import os
 
 sns.set_theme()
-path = "/home/proceduraltree/Projects/Bsc_CH_NN_Solving"
 
 
-def main():
-    dataset = os.listdir(f"{path}/data/")
-    dataset = [d.replace(".npy", "") for d in dataset]
+def plot(path: str, dir: str, savedir: str) -> None:
+    dataset = os.listdir(f"{path}/{dir}/")
+    dataset = [d.replace(".npz", "") for d in dataset]
     print(dataset)
     for d in dataset:
-        data = np.load(f"{path}/data/{d}.npy")
-        imgpath = f"{path}/images/{d}/"
-        print(f"Shape of data: {data.shape}")
+        data = np.load(f"{path}/{dir}/{d}.npz")
+        phase_data = data["phase"]
+        imgpath = f"{path}/{savedir}/{d}/"
+        print(f"Shape of data: {phase_data.shape}")
         if not os.path.exists(imgpath):
             os.mkdir(imgpath)
         print(d)
-        for i in range(data.shape[0]):
-            print(f"Saving image {i}/{data.shape[0]-1}")
+        for i in range(phase_data.shape[0]):
+            print(f"Saving image {i+1}/{phase_data.shape[0]}")
             plt.figure()
-            sns.heatmap(data[i])
-            plt.savefig(f"{path}/images/{d}/{d}_{i:03}.png")
+            sns.heatmap(phase_data[i])
+            plt.savefig(f"{path}/{savedir}/{d}/{d}_{i:03}.png")
             plt.close("all")
-
+        print("Generating GIF \n")
         os.system(
-            f"convert -layers OptimizePlus -delay 1x24 -quality 99 {path}/images/{d}/*.png -loop 0 {path}/images/{d}.gif"
+            f"convert -layers OptimizePlus -delay 1x24 -quality 99 {path}/{savedir}/{d}/*.png -loop 0 {path}/{savedir}/{d}.gif"
         )
+
+
+def main() -> None:
+    path = "/home/proceduraltree/Projects/Bsc_CH_NN_Solving"
+    plot(path, "data/experiments", "images")
 
 
 if __name__ == "__main__":

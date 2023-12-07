@@ -109,9 +109,9 @@ W'(\phi_{ij}^n) - 2\phi_{ij}^n
 \right)
 \)
 the algorithm is then defined as:
-#+caption: FAS Multigrid v-cycle as defined  by [cite:@SHIN20117441]
-#+attr_html: :width 500px
-[[attachment:_20231031_120115screenshot.png]]
+# #+caption: FAS Multigrid v-cycle as defined  by [cite:@SHIN20117441]
+# +# attr_html: :width 500px
+[[#  attachment:_20231031_120115screenshot.png]]
 
 wherein SMOOTH consists of point-wise Gauß Seidel Relaxation , by solving /L/ for \( \overline{\phi} ,\overline{\mu} \) with the initial guess for \( \zeta^n , \psi^n \).
 ** adaptations to the simplified problem
