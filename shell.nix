@@ -10,6 +10,7 @@ let
       seaborn
       scipy
       pydantic
+      tqdm
 
       # Dev  deps
       python-lsp-server
