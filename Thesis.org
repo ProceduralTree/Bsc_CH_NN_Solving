@@ -142,18 +142,23 @@ import seaborn as sns
 sns.set_theme()
 #+end_src
 
+#+name: dots
 #+header: :file images/phase.png
-#+begin_src python :results graphics file output :eval never-export :session
+#+begin_src python :results graphics file output :eval never-export :session :wrap \subfigure
 tu.SEED = 13
-test_phase = tu.k_spheres_phase(4,5)
+test_phase = tu.k_spheres_phase(5,6)
 plt.figure()
 sns.heatmap(test_phase)
 #+end_src
 
-#+RESULTS:
+#+RESULTS: dots
+#+begin_\subfigure
 [[file:images/phase.png]]
+#+end_\subfigure
 
 
+
+ #+name: points
 #+header: :file images/phase2.png
 #+begin_src python :results graphics file output    :session  :eval never-export :exports results
 test_phase = tu.k_squares_phase(8, 1)
@@ -164,9 +169,11 @@ sns.heatmap(test_phase)
 #+RESULTS:
 [[file:images/phase2.png]]
 
+
 *** circles
 
 ** Tests
+
 #+begin_src python :session :async :eval never-export :results results
 test_phase = tu.k_spheres_phase(4,7)
 solver = tu.setup_solver(test_phase)
@@ -174,7 +181,7 @@ solver.solve(4,10)
 #+end_src
 
 #+RESULTS:
-: None
+: /tmp/babel-F6hNld/python-PPX6WG
 
 #+begin_src python :results file graphics output :file it_40.png :session  :eval never-export
 plt.figure()
@@ -182,10 +189,7 @@ sns.heatmap(solver.phase_small)
 #+end_src
 
 #+RESULTS:
-[[file:it_40.png]]
-
-
-
+[]
 
 * Relaxed Problem
 In effort to decrease the order of complexity, the following relaxation to the classical CH Equation is proposed:
