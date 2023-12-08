@@ -165,7 +165,7 @@ def SMOOTH_jit(
                 phase_small[i, j] = res[0]
                 mu_small[i, j] = res[1]
 
-        if adaptive and np.linalg.norm(old_phase - phase_small) < 1e-10:
+        if adaptive and np.linalg.norm(old_phase - phase_small) < 1e-14:
             break
 
     return (phase_small, mu_small)

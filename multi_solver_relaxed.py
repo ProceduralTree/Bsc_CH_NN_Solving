@@ -3,12 +3,13 @@ from numba import njit
 
 import scipy.optimize as sp
 
-from typing import Tuple
+from typing import Tuple, NamedTuple
 from multi_solver import Interpolate, Restrict, __G_h
 
 
 @njit
 def SMOOTH_relaxed_njit(
+    c: np.ndarray,
     xi: np.ndarray,
     psi: np.ndarray,
     phase_small: np.ndarray,

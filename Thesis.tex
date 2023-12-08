@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 % Created 2023-12-08 Fr 15:29
+=======
+% Created 2023-12-08 Fri 17:08
+>>>>>>> origin/main
 % Intended LaTeX compiler: pdflatex
 \documentclass[11pt]{article}
 \usepackage[utf8]{inputenc}
@@ -22,7 +26,7 @@
  pdftitle={Bsc Thesis},
  pdfkeywords={},
  pdfsubject={},
- pdfcreator={Emacs 28.2 (Org mode 9.7)}, 
+ pdfcreator={Emacs 28.3 (Org mode 9.7)}, 
  pdflang={English}}
 \usepackage{biblatex}
 \addbibresource{~/org/resources/bibliography/refs.bib}
@@ -32,11 +36,15 @@
 \tableofcontents
 
 \section{Cahn Hillard Equation Overview}
+<<<<<<< HEAD
 \label{sec:org31147c6}
+=======
+\label{sec:org8a3c2ff}
+>>>>>>> origin/main
 Partial Differential Equation (PDE) solving the state of a 2 Phase Fluid\autocite{Wu_2022}. The form of the Cahn Hillard Equation used for the remainder of this thesis is:
 \begin{align}
 \phi _t(x,t) &=  \Delta  \mu \\
-\mu &= - \varepsilon^2 \Delta \Phi  + W'(\Phi
+\mu &= - \varepsilon^2 \Delta \phi   + W'(\phi)
 \end{align}
 where \(\phi\) is the so called phase field. Demarking the different states of the fluids through an Interval \(I=[-1,1]\) and where \(\partial I = \{-1,1\}\)  represents full state of one fluid. \(\varepsilon > 0\) is  a positive constant
 
@@ -45,9 +53,15 @@ where \(\phi\) is the so called phase field. Demarking the different states of t
 
 The Advantages of the Cahn Hillard Approach as compared to traditional fluid dynamics solvers are for example: ``explicit tracking of the interface'' \autocite{Wu_2022}, as well as ``evolution of complex geometries and topological changes [\ldots{}] in a natural way'' \autocite{Wu_2022}
 \subsection{{\bfseries\sffamily TODO} Derivation from paper}
+<<<<<<< HEAD
 \label{sec:orge0bc234}
 \subsubsection{Free energy}
 \label{sec:orgaeb3229}
+=======
+\label{sec:org52b80ab}
+\subsubsection{Free energy}
+\label{sec:org8bd12f1}
+>>>>>>> origin/main
 The Cahn Hillard Equations can be motivated Using a \textbf{Ginzburg Landau} type free energy equation:
 \begin{align*}
 E^{\text{bulk}}  = \int_{  \Omega}  \frac{\varepsilon^2}{2} |\nabla \phi |^2 + F(\phi) \,dx
@@ -59,7 +73,11 @@ The chemical potential then follows as derivative of Energy in respect to time.
  \mu &= \frac{\delta E_{bulk}(\phi)}{\delta \phi } = -\varepsilon^2 \Delta \phi  + W'(\phi)
 \end{align*}
 \subsubsection{Derivation by mass balance}
+<<<<<<< HEAD
 \label{sec:org0c2e61c}
+=======
+\label{sec:orgaadf4c8}
+>>>>>>> origin/main
 The Cahn Hillard equation then can be motivated as follows:
 consider
 \begin{equation}
@@ -90,10 +108,17 @@ then for \(\phi\) then follows:
 \end{align*}
 hence the Free Energy is decreasing in time.
 \section{Baseline Multigrid solver:}
+<<<<<<< HEAD
 \label{sec:orgda878d7}
 As baseline for further experiments a multi grid method based on finite differences by\autocite{SHIN20117441}. is used.
 \subsection{Discretization:\hfill{}\textsc{ATTACH}}
 \label{sec:orgd8fd55b}
+=======
+\label{sec:org46fde8d}
+As baseline for further experiments a multi grid method based on finite differences by\autocite{SHIN20117441}. is used.
+\subsection{Discretization:\hfill{}\textsc{ATTACH}}
+\label{sec:org6f425c3}
+>>>>>>> origin/main
 it discretizes the phasefield and potential energy \(\phi, \mu\) into a grid wise functions \(\phi_{ij}, \mu_{ij}\) and defines the partial derivatives \(D_xf_{ij}, \  D_yf_{ij}\) using the differential quotients:
 \begin{align*}
 D_xf_{i+\frac{1}{2} j} &= \frac{f_{i+1j} - f_{ij}}{h} & D_yf_{ij+\frac{1}{2}} &= \frac{f_{ij+1} - f_{ij}}{h}
@@ -141,7 +166,11 @@ the algorithm is then defined as:
 
 wherein SMOOTH consists of point-wise Gauß Seidel Relaxation , by solving \emph{L} for \(\overline{\phi} ,\overline{\mu}\) with the initial guess for \(\zeta^n , \psi^n\).
 \subsection{adaptations to the simplified problem}
+<<<<<<< HEAD
 \label{sec:org023801b}
+=======
+\label{sec:orgeeaf564}
+>>>>>>> origin/main
 even tough this work uses rectangular domains, the adaptation of the algorithm is simplified by the domain indicator function, as well as 0 padding, in order to correctly include the boundry conditions of the CH equation.
 therefore the internal representation of the adapted algorithm considers phasefield and potential field \(\phi , \mu\) as 2D arrays of shape \((N_X + 2 , N_y + 2)\) in order to accommodate padding. Where N\textsubscript{x} and N\textsubscript{y} are the number of steps in x- / y-Direction respectively.
 Hence, we define the discrete domain function as:
@@ -153,9 +182,15 @@ G_{ij} &=
 \end{cases}
 \end{align*}
 \subsection{tests\textsubscript{data}:}
+<<<<<<< HEAD
 \label{sec:orge42f2e3}
 \subsubsection{squares}
 \label{sec:org2a7c468}
+=======
+\label{sec:org815283c}
+\subsubsection{squares}
+\label{sec:org9898bf1}
+>>>>>>> origin/main
 For testting and later training , a multitude o different phasefields where used. notably an assortment of rnadomly lpaced circles, squares, and arbetrary generated values
 \begin{center}
 \includegraphics[width=.9\linewidth]{images/phase.png}
@@ -166,8 +201,15 @@ For testting and later training , a multitude o different phasefields where used
 \begin{center}
 \includegraphics[width=.9\linewidth]{images/phase2.png}
 \end{center}
+<<<<<<< HEAD
 \subsection{Tests}
 \label{sec:org7dc5850}
+=======
+\subsubsection{circles}
+\label{sec:org4aa1f6d}
+\subsection{Tests}
+\label{sec:orgb49f240}
+>>>>>>> origin/main
 
 \begin{minted}[frame=lines,breaklines,linenos=true]{python}
 test_phase = tu.k_spheres_phase(4,7)
@@ -181,12 +223,30 @@ sns.heatmap(solver.phase_small)
 \end{minted}
 []
 \section{Relaxed Problem}
+<<<<<<< HEAD
 \label{sec:org38cea0d}
+=======
+\label{sec:org24e0cd8}
+>>>>>>> origin/main
 In effort to decrease the order of complexity, the following relaxation to the classical CH Equation is proposed:
+\begin{align*}
+\partial_t \phi  &= \Delta \mu \\
+\mu &= \varepsilon ^2(c^\alpha - \phi^\alpha) + W'(\phi)
+\end{align*}
+where \(c\) is the solution of the following elliptical PDE
+\begin{align*}
+- \Delta c^\alpha  + \alpha c^a &= \alpha \phi ^\alpha
+\end{align*}
 \subsection{{\bfseries\sffamily TODO} relaxed operators:}
+<<<<<<< HEAD
 \label{sec:org5a89b64}
 \subsubsection{L Relaxed}
 \label{sec:orgf7bb500}
+=======
+\label{sec:org8087e9a}
+\subsubsection{L Relaxed}
+\label{sec:org93b82d1}
+>>>>>>> origin/main
 \begin{align*}
 L
 \begin{pmatrix}
@@ -200,7 +260,11 @@ L
 \end{pmatrix}
 \end{align*}
 \subsubsection{SMOOTH}
+<<<<<<< HEAD
 \label{sec:org69bd372}
+=======
+\label{sec:org6e6768b}
+>>>>>>> origin/main
 
 \begin{align*}
 SMOOTH( \phi^{n+1,m}_{ij}, \mu^{n + \frac{1}{2},m}_{ji}, L_h , \zeta ^n , \psi ^n )
@@ -215,7 +279,11 @@ SMOOTH( \phi^{n+1,m}_{ij}, \mu^{n + \frac{1}{2},m}_{ji}, L_h , \zeta ^n , \psi ^
 \end{align*}
 \begin{enumerate}
 \item Proposal
+<<<<<<< HEAD
 \label{sec:orgf2731af}
+=======
+\label{sec:org644b61b}
+>>>>>>> origin/main
 design newton method to solve second equation (in conjunction with the first one) hopefully solving is faster than the original multiple SMOOTH Iterations.
  The iteration is to solve for \(\phi ^{n+1,m}_{ij}\) as free variable. Therefore it follows for \(F(x)\)
 
@@ -232,15 +300,21 @@ And the derivative for the iteration is
 \end{align*}
 \end{enumerate}
 \subsection{Elliptical PDE:}
+<<<<<<< HEAD
 \label{sec:orgb36e4e9}
 on order to solve the relaxed CH Equation the following PDE as to be solved in Each additional time step:
 \begin{align*}
 - \Delta c^\alpha  + \alpha c^a &= \alpha \phi ^\alpha
 \end{align*}
+=======
+\label{sec:org2f4ef1c}
+on order to solve the relaxed CH Equation the following PDE as to be solved in Each additional time step:
+>>>>>>> origin/main
 or in terms of the characteristic function:
 \begin{align*}
 - \nabla \cdot  (G \nabla c^\alpha) + \alpha c^\alpha  = \alpha \phi ^\alpha
 \end{align*}
+<<<<<<< HEAD
 \subsubsection{Discretisation}
 \label{sec:orgf2e3e35}
 
@@ -250,5 +324,21 @@ or in terms of the characteristic function:
 \end{align*}
 \section{References}
 \label{sec:orge455982}
+=======
+\subsubsection{Discretization}
+\label{sec:org12de1ac}
+Discretization of the PDE
+\begin{align*}
+- \nabla_d \cdot  (G_{ij} \nabla_d c_{ij}^\alpha) + \alpha  c_{ij}^\alpha &= \alpha \phi_{ij}^\alpha \\
+- (\frac{1}{h}(G_{i+\frac{1}{2}j} \nabla c^\alpha_{i+\frac{1}{2}j} + G_{ij+\frac{1}{2}} \nabla c^\alpha_{ij+\frac{1}{2}}) &  \\
+- (G_{i-\frac{1}{2}j} \nabla c^\alpha_{i-\frac{1}{2}j} + G_{ij-\frac{1}{2}} \nabla c^\alpha_{ij-\frac{1}{2}})) + \alpha  c_{ij}^\alpha   &= \alpha  \phi_{ij}^\alpha \\
+\frac{1}{h^2} ( G_{i+\frac{1}{2}j}(c_{i+1j}^\alpha - c_{ij}^\alpha) & \\
++G_{ij+\frac{1}{2}}(c_{ij+1}^\alpha - c_{ij}^\alpha) &\\
++G_{i-\frac{1}{2}j}(c_{i-1j}^\alpha - c_{ij}^\alpha)&\\
++G_{ij-\frac{1}{2}}(c_{ij-1}^\alpha - c_{ij}^\alpha))&=\alpha  \phi_{ij}^\alpha \\
+\end{align*}
+\section{References}
+\label{sec:orgfef094c}
+>>>>>>> origin/main
 \printbibliography
 \end{document}
