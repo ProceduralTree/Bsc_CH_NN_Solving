@@ -1,10 +1,21 @@
 #+title: Tasks
 
+* TODO Tests [0/1]
+- [-] try different:
+  - [ ] epsilon
+  - [ ] gridsizes
+  - [ ] timesteps
 * TODO Enable adaptive SMOOTH operation
 ** Look for non adaptive differences
 
-* TODO Data gen for training
-
+* TODO Data gen for training [1/3]
+- [X] initial test date phasefield , and  potential
+- [ ] elyptical PDE data
+- [ ] more varied training data / larger datasets
+  - [ ] different seeds
+  - [ ] sphere phasefield
+  - [ ] squares phasefield
+  - [ ] random phasefields
 * TODO write elyptical PDE solver
 
 * TODO finish relaxed adapdtations

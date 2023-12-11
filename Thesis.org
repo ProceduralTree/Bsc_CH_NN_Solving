@@ -254,7 +254,7 @@ or in terms of the characteristic function:
 - \nabla \cdot  (G \nabla c^\alpha) + \alpha c^\alpha  = \alpha \phi ^\alpha
 \end{align*}
 
-*** Discretization
+*** Discretization :ATTACH:
 Discretization of the PDE
 \begin{align*}
 - \nabla_d \cdot  (G_{ij} \nabla_d c_{ij}^\alpha) + \alpha  c_{ij}^\alpha &= \alpha \phi_{ij}^\alpha \\
@@ -263,8 +263,21 @@ Discretization of the PDE
 \frac{1}{h^2} ( G_{i+\frac{1}{2}j}(c_{i+1j}^\alpha - c_{ij}^\alpha) & \\
 +G_{ij+\frac{1}{2}}(c_{ij+1}^\alpha - c_{ij}^\alpha) &\\
 +G_{i-\frac{1}{2}j}(c_{i-1j}^\alpha - c_{ij}^\alpha)&\\
-+G_{ij-\frac{1}{2}}(c_{ij-1}^\alpha - c_{ij}^\alpha))&=\alpha  \phi_{ij}^\alpha \\
++G_{ij-\frac{1}{2}}(c_{ij-1}^\alpha - c_{ij}^\alpha)) + \alpha  c_{ij}^\alpha &=\alpha  \phi_{ij}^\alpha \\
 \end{align*}
+proposed simple solver:
+
+solve equation for \( c_{ij}^\alpha  \) and then iteratively update the entire phasefield using the already updated values:
+
+
+
+
+
+
+
+
+
+
 
 
 

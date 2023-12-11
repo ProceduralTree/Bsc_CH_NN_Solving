@@ -2,18 +2,24 @@ import numpy as np
 from numba import njit
 
 import scipy.optimize as sp
+from numpy.typing import NDArray
 
 from typing import Tuple, NamedTuple
 from multi_solver import Interpolate, Restrict, __G_h
 
 
 @njit
+def elyps_solver(c: NDArray[np.float64]) -> None:
+    pass
+
+
+@njit
 def SMOOTH_relaxed_njit(
-    c: np.ndarray,
-    xi: np.ndarray,
-    psi: np.ndarray,
-    phase_small: np.ndarray,
-    mu_small: np.ndarray,
+    c: NDArray[np.float64],
+    xi: NDArray[np.float64],
+    psi: NDArray[np.float64],
+    phase_small: NDArray[np.float64],
+    mu_small: NDArray[np.float64],
     epsilon: float,
     h: float,
     dt: float,
@@ -21,7 +27,7 @@ def SMOOTH_relaxed_njit(
     width_small: int,
     v: int,
     alpha: float,
-) -> Tuple[np.ndarray, np.ndarray]:
+) -> Tuple[NDArray[np.float64], NDArray[np.float64]]:
     for k in range(v):
         for i in range(1, len_small + 1):
             for j in range(1, width_small + 1):
@@ -70,11 +76,11 @@ class CH_2D_Multigrid_Solver:
 
     Parameters
     ---
-    `phase_small` : np.ndarray
+    `phase_small` : NDArray[np.float64]
         phase field vallue on the small grid
-    `phase_smooth` : np.ndarray
+    `phase_smooth` : NDArray[np.float64]
         phase field vallue after smothing, NaN if not yet calculated
-    `phase_large` : np.ndarray
+    `phase_large` : NDArray[np.float64]
         phase field vallue on the large grid
     `dt` : float
         length ot timesteps in seconds
@@ -85,18 +91,20 @@ class CH_2D_Multigrid_Solver:
 
     """
 
-    mu_large: np.ndarray
-    mu_small: np.ndarray
-    # mu_smooth: np.ndarray
-    # phase_smooth: np.ndarray
-    phase_large: np.ndarray
-    phase_small: np.ndarray
-    xi: np.ndarray
-    psi: np.ndarray
+    mu_large: NDArray[np.float64]
+    mu_small: NDArray[np.float64]
+    # mu_smooth: NDArray[np.float64]
+    # phase_smooth: NDArray[np.float64]
+    phase_large: NDArray[np.float64]
+    phase_small: NDArray[np.float64]
+    xi: NDArray[np.float64]
+    psi: NDArray[np.float64]
     dt: float
     h: float
     epsilon: float
-    LinOp = NamedTuple("LinOp", [("A", np.ndarray), ("b", np.ndarray)])
+    LinOp = NamedTuple(
+        "LinOp", [("A", NDArray[np.float64]), ("b", NDArray[np.float64])]
+    )
     len_small: int
     len_large: int
     width_small: int
@@ -106,7 +114,7 @@ class CH_2D_Multigrid_Solver:
     def __init__(
         self,
         wprime: np.vectorize,
-        phase: np.ndarray,
+        phase: NDArray[np.float64],
         dt: float,
         h: float,
         epsilon: float,
@@ -131,7 +139,7 @@ class CH_2D_Multigrid_Solver:
         self.psi = np.zeros(self.phase_small.shape)
         pass
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f""" Cahn Hillard solver: \n
         --------------------------\n
         Timestepsize:  {self.dt}s\n
@@ -142,7 +150,7 @@ class CH_2D_Multigrid_Solver:
 
         """
 
-    def __G_h(self, i, j):
+    def __G_h(self, i, j) -> int:
         """
         small grid version
 
@@ -154,7 +162,7 @@ class CH_2D_Multigrid_Solver:
             return 1
         return 0
 
-    def __G_H(self, i, j):
+    def __G_H(self, i, j) -> int:
         """
         large grid version
 
@@ -366,13 +374,13 @@ class CH_2D_Multigrid_Solver:
 
         pass
 
-    def solve(self, iterations: int, iteration_depth: int):
+    def solve(self, iterations: int, iteration_depth: int) -> None:
         for i in range(iterations):
             self.set_xi_and_psi()
             for j in range(iteration_depth):
                 self.v_cycle()
 
-    def set_xi_and_psi(self):
+    def set_xi_and_psi(self) -> None:
         self.xi[1:-1, 1:-1] = np.array(
             [
                 [
@@ -393,7 +401,7 @@ class CH_2D_Multigrid_Solver:
             ]
         )
 
-    def __Restrict(self, array: np.ndarray) -> np.ndarray:
+    def __Restrict(self, array: NDArray[np.float64]) -> NDArray[np.float64]:
         """
         restricts an array on the small grid to an array in the large grid
 
@@ -405,7 +413,7 @@ class CH_2D_Multigrid_Solver:
             array, self.len_large, self.width_large, self.len_small, self.width_small
         )
 
-    def __Interpolate(self, array: np.ndarray) -> np.ndarray:
+    def __Interpolate(self, array: NDArray[np.float64]) -> NDArray[np.float64]:
         """
         interpolates from large grid to small grid
 
