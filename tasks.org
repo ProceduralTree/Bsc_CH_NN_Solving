@@ -16,7 +16,9 @@
   - [ ] sphere phasefield
   - [ ] squares phasefield
   - [ ] random phasefields
-* TODO write elyptical PDE solver
+* TODO write elyptical PDE solver [1/2]
+- [X] implementation
+- [ ] test
 
 * TODO finish relaxed adapdtations
 

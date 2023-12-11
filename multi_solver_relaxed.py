@@ -9,8 +9,38 @@ from multi_solver import Interpolate, Restrict, __G_h
 
 
 @njit
-def elyps_solver(c: NDArray[np.float64]) -> None:
-    pass
+def elyps_solver(
+    c: NDArray[np.float64],
+    phase: NDArray[np.float64],
+    len: int,
+    width: int,
+    alpha: float,
+        n:int
+) -> NDArray[np.float64]:
+    for i in range(n):
+        for i in range(1, len + 1):
+            for j in range(1, width + 1):
+                bordernumber = (
+                    __G_h(i + 0.5, j, len, width)
+                    + __G_h(i - 0.5, j, len, width)
+                    + __G_h(i, j + 0.5, len, width)
+                    + __G_h(i, j - 0.5, len, width)
+                )
+
+                F = np.vectorize(
+                    lambda x: __G_h(i + 0.5, j, len, width) * c[i + 1, j]
+                    + __G_h(i - 0.5, j, len, width) * c[i - 1, j]
+                    + __G_h(i, j + 0.5, len, width) * c[i, j + 1]
+                    + __G_h(i, j - 0.5, len, width) * c[i, j - 1]
+                    - (bordernumber) * x
+                    - alpha * x**alpha
+                    - alpha * phase[i, j] ** alpha
+                )
+                dF = np.vectorize(lambda x: bordernumber + alpha**2 * x ** (alpha - 1))
+
+                x = sp.newton(F, c[i, j], dF)
+                c[i, j] = x
+   return c
 
 
 @njit
@@ -110,6 +140,8 @@ class CH_2D_Multigrid_Solver:
     width_small: int
     width_large: int
     W_prime: np.vectorize
+    alpha: float
+    c: NDArray[np.float64]
 
     def __init__(
         self,
@@ -137,6 +169,8 @@ class CH_2D_Multigrid_Solver:
         self.mu_small[1:-1, 1:-1] = wprime(self.phase_small[1:-1, 1:-1])
         self.xi = np.zeros(self.phase_small.shape)
         self.psi = np.zeros(self.phase_small.shape)
+        self.alpha = 200
+        self.c = np.zeros(self.phase_small.shape)
         pass
 
     def __str__(self) -> str:
@@ -178,7 +212,8 @@ class CH_2D_Multigrid_Solver:
         self,
         v: int,
     ) -> None:
-        [self.phase_small, self.mu_small] = SMOOTH_jit(
+        [self.phase_small, self.mu_small] = SMOOTH_relaxed_njit(
+            self.c,
             self.xi,
             self.psi,
             self.phase_small,
@@ -188,7 +223,7 @@ class CH_2D_Multigrid_Solver:
             self.dt,
             self.len_small,
             self.width_small,
-            v,
+            self.alpha,
         )
         pass
 
@@ -293,23 +328,7 @@ class CH_2D_Multigrid_Solver:
         return self.LinOp(coeffmatrix, b)
 
     def v_cycle(self) -> None:
-        # init xi , psi
-        # rewrite: smooth all before further processing
-
-        # xipsi = np.zeros((self.len_small + 2, self.width_small + 2, 2))
-
-        # xipsi[1:-1, 1:-1] = np.array(
-        #    [
-        #        [
-        #            self.L_h(i, j).A.dot(
-        #                np.array([self.phase_small[i, j], self.mu_small[i, j]])
-        #                + self.L_h(i, j).b
-        #            )
-        #            for i in range(1, self.len_small + 1)
-        #        ]
-        #        for j in range(1, self.width_small + 1)
-        #    ]
-        # )
+        self.c = elyps_solver(self.c, self.phase_small, self.alpha, 200)
 
         # TODO more (v_1,v_2) smoothing steps
         self.SMOOTH(40)
