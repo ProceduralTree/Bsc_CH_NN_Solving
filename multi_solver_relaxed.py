@@ -1,11 +1,46 @@
 import numpy as np
 from numba import njit
+import numba_scipy
 
 import scipy.optimize as sp
 from numpy.typing import NDArray
 
+import numba as nb
+
 from typing import Tuple, NamedTuple
 from multi_solver import Interpolate, Restrict, __G_h
+
+
+@njit
+def F__elyps(
+    x: float,
+    bordernumber: float,
+    alpha: float,
+    h: float,
+    c,
+    phase,
+    len: int,
+    width: int,
+    i: int,
+    j: int,
+) -> float:
+    return (
+        h**-2
+        * (
+            __G_h(i + 0.5, j, len, width) * c[i + 1, j]
+            + __G_h(i - 0.5, j, len, width) * c[i - 1, j]
+            + __G_h(i, j + 0.5, len, width) * c[i, j + 1]
+            + __G_h(i, j - 0.5, len, width) * c[i, j - 1]
+        )
+        - (bordernumber) * x
+        - alpha * x**alpha
+        - alpha * phase[i, j] ** alpha
+    )
+
+
+@njit
+def dF_elyps(x: float, bordernumber: float, alpha: float) -> float:
+    return bordernumber + alpha**2 * x ** (alpha - 1)
 
 
 @njit
@@ -15,8 +50,11 @@ def elyps_solver(
     len: int,
     width: int,
     alpha: float,
-        n:int
+    h: float,
+    n: int,
 ) -> NDArray[np.float64]:
+    maxiter = 100
+    tol = 1e-14
     for i in range(n):
         for i in range(1, len + 1):
             for j in range(1, width + 1):
@@ -27,20 +65,30 @@ def elyps_solver(
                     + __G_h(i, j - 0.5, len, width)
                 )
 
-                F = np.vectorize(
-                    lambda x: __G_h(i + 0.5, j, len, width) * c[i + 1, j]
-                    + __G_h(i - 0.5, j, len, width) * c[i - 1, j]
-                    + __G_h(i, j + 0.5, len, width) * c[i, j + 1]
-                    + __G_h(i, j - 0.5, len, width) * c[i, j - 1]
-                    - (bordernumber) * x
-                    - alpha * x**alpha
-                    - alpha * phase[i, j] ** alpha
-                )
-                dF = np.vectorize(lambda x: bordernumber + alpha**2 * x ** (alpha - 1))
+                x = c[i, j]
+                for iter in range(maxiter):
+                    F = (
+                        h**-2
+                        * (
+                            __G_h(i + 0.5, j, len, width) * c[i + 1, j] ** alpha
+                            + __G_h(i - 0.5, j, len, width) * c[i - 1, j] ** alpha
+                            + __G_h(i, j + 0.5, len, width) * c[i, j + 1] ** alpha
+                            + __G_h(i, j - 0.5, len, width) * c[i, j - 1] ** alpha
+                        )
+                        - (bordernumber) * x**alpha
+                        - alpha * x**alpha
+                        - alpha * phase[i, j] ** alpha
+                    )
+                    dF = bordernumber + alpha**2 * x ** (alpha - 1)
+                    if dF == 0:
+                        return "ERROR newton iteration in elyps solver did not converge, dF was 0"
+                    step = F / dF
+                    x1 = x - step
+                    if np.linalg.norm(x - x1 > tol):
+                        break
 
-                x = sp.newton(F, c[i, j], dF)
                 c[i, j] = x
-   return c
+    return c
 
 
 @njit
@@ -91,6 +139,15 @@ def SMOOTH_relaxed_njit(
                     lambda x: alpha * epsilon**2 * x ** (alpha - 1) + 2 + dt**-1
                 )
 
+                x = phase_small[i, j]
+
+                # implement newton
+                for iter in range(maxiter):
+                    F = 0
+                    dF = 1
+                    step = F / dF
+                    x1 = x - step
+
                 root = sp.newton(F, phase_small[i, j], dF)
 
                 phase_small[i, j] = root
@@ -99,7 +156,7 @@ def SMOOTH_relaxed_njit(
     return (phase_small, mu_small)
 
 
-class CH_2D_Multigrid_Solver:
+class CH_2D_Multigrid_Solver_relaxed:
 
     """
     Cahn Hillard solever based on the paper [[file:JCP.pdf]]
@@ -328,7 +385,15 @@ class CH_2D_Multigrid_Solver:
         return self.LinOp(coeffmatrix, b)
 
     def v_cycle(self) -> None:
-        self.c = elyps_solver(self.c, self.phase_small, self.alpha, 200)
+        self.c = elyps_solver(
+            self.c,
+            self.phase_small,
+            self.len_small,
+            self.width_small,
+            self.alpha,
+            self.h,
+            200,
+        )
 
         # TODO more (v_1,v_2) smoothing steps
         self.SMOOTH(40)

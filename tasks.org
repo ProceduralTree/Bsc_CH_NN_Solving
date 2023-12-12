@@ -11,16 +11,17 @@
 * TODO Data gen for training [1/3]
 - [X] initial test date phasefield , and  potential
 - [ ] elyptical PDE data
-- [ ] more varied training data / larger datasets
+- [-] more varied training data / larger datasets [1/4]
   - [ ] different seeds
   - [ ] sphere phasefield
-  - [ ] squares phasefield
+  - [X] squares phasefield
   - [ ] random phasefields
-* TODO write elyptical PDE solver [1/2]
-- [X] implementation
+* TODO write elyptical PDE solver [1/3]
+- [X] outline of implementation
+- [ ] use own newton solver for numba
 - [ ] test
 
-* TODO finish relaxed adapdtations
+* TODO finish relaxed adaptations
 
 * TODO check v_cycle implementation
 
