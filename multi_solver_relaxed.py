@@ -12,38 +12,6 @@ from multi_solver import Interpolate, Restrict, __G_h
 
 
 @njit
-def F__elyps(
-    x: float,
-    bordernumber: float,
-    alpha: float,
-    h: float,
-    c,
-    phase,
-    len: int,
-    width: int,
-    i: int,
-    j: int,
-) -> float:
-    return (
-        h**-2
-        * (
-            __G_h(i + 0.5, j, len, width) * c[i + 1, j]
-            + __G_h(i - 0.5, j, len, width) * c[i - 1, j]
-            + __G_h(i, j + 0.5, len, width) * c[i, j + 1]
-            + __G_h(i, j - 0.5, len, width) * c[i, j - 1]
-        )
-        - (bordernumber) * x
-        - alpha * x**alpha
-        - alpha * phase[i, j] ** alpha
-    )
-
-
-@njit
-def dF_elyps(x: float, bordernumber: float, alpha: float) -> float:
-    return bordernumber + alpha**2 * x ** (alpha - 1)
-
-
-@njit
 def elyps_solver(
     c: NDArray[np.float64],
     phase: NDArray[np.float64],
@@ -54,7 +22,7 @@ def elyps_solver(
     n: int,
 ) -> NDArray[np.float64]:
     maxiter = 100
-    tol = 1e-14
+    tol = 1.48e-10
     for i in range(n):
         for i in range(1, len + 1):
             for j in range(1, width + 1):
@@ -81,11 +49,14 @@ def elyps_solver(
                     )
                     dF = bordernumber + alpha**2 * x ** (alpha - 1)
                     if dF == 0:
-                        return "ERROR newton iteration in elyps solver did not converge, dF was 0"
+                        raise RuntimeError(
+                            "ERROR newton iteration in elyps solver did not converge, dF was 0"
+                        )
                     step = F / dF
                     x1 = x - step
-                    if np.linalg.norm(x - x1 > tol):
+                    if abs(x - x1) > tol:
                         break
+                    x = x1
 
                 c[i, j] = x
     return c
@@ -106,52 +77,57 @@ def SMOOTH_relaxed_njit(
     v: int,
     alpha: float,
 ) -> Tuple[NDArray[np.float64], NDArray[np.float64]]:
+    maxiter = 100
+    tol = 1.48e-10
     for k in range(v):
         for i in range(1, len_small + 1):
             for j in range(1, width_small + 1):
-                y = np.vectorize(
-                    lambda x: x * dt**-1
-                    - xi[i, j]
-                    - h**-2
-                    * (
-                        __G_h(i + 0.5, j, len_small, width_small) * mu_small[i + 1, j]
-                        + __G_h(i - 0.5, j, len_small, width_small) * mu_small[i - 1, j]
-                        + __G_h(i, j + 0.5, len_small, width_small) * mu_small[i, j + 1]
-                        + __G_h(i, j - 0.5, len_small, width_small) * mu_small[i, j - 1]
-                    )
-                    * (
-                        __G_h(i + 0.5, j, len_small, width_small)
-                        + __G_h(i - 0.5, j, len_small, width_small)
-                        + __G_h(i, j + 0.5, len_small, width_small)
-                        + __G_h(i, j - 0.5, len_small, width_small)
-                    )
-                    ** -1
-                )
-                F = np.vectorize(
-                    lambda x: epsilon**2 * x**alpha
-                    + 2 * x
-                    - epsilon**2 * c[i, j] ** alpha
-                    + y(x)
-                    + psi[i, j]
-                )
-
-                dF = np.vectorize(
-                    lambda x: alpha * epsilon**2 * x ** (alpha - 1) + 2 + dt**-1
-                )
-
                 x = phase_small[i, j]
-
-                # implement newton
+                y = 0
+                # implement newton iteration
                 for iter in range(maxiter):
-                    F = 0
-                    dF = 1
+                    y = (
+                        x * dt**-1
+                        - xi[i, j]
+                        - h**-2
+                        * (
+                            __G_h(i + 0.5, j, len_small, width_small)
+                            * mu_small[i + 1, j]
+                            + __G_h(i - 0.5, j, len_small, width_small)
+                            * mu_small[i - 1, j]
+                            + __G_h(i, j + 0.5, len_small, width_small)
+                            * mu_small[i, j + 1]
+                            + __G_h(i, j - 0.5, len_small, width_small)
+                            * mu_small[i, j - 1]
+                        )
+                        * (
+                            __G_h(i + 0.5, j, len_small, width_small)
+                            + __G_h(i - 0.5, j, len_small, width_small)
+                            + __G_h(i, j + 0.5, len_small, width_small)
+                            + __G_h(i, j - 0.5, len_small, width_small)
+                        )
+                        ** -1
+                    )
+                    F = (
+                        epsilon**2 * x**alpha
+                        + 2 * x
+                        - epsilon**2 * c[i, j] ** alpha
+                        + y
+                        + psi[i, j]
+                    )
+
+                    dF = alpha * epsilon**2 * x ** (alpha - 1) + 2 + dt**-1
+                    if dF == 0:
+                        raise RuntimeError("newton solver failed in SMOOTH: dF was 0")
                     step = F / dF
                     x1 = x - step
+                    if abs(x - x1) < tol:
+                        break
+                    x = x1
 
-                root = sp.newton(F, phase_small[i, j], dF)
-
+                root = x
                 phase_small[i, j] = root
-                mu_small[i, j] = y(root)
+                mu_small[i, j] = y
 
     return (phase_small, mu_small)
 
@@ -280,6 +256,7 @@ class CH_2D_Multigrid_Solver_relaxed:
             self.dt,
             self.len_small,
             self.width_small,
+            v,
             self.alpha,
         )
         pass
@@ -385,17 +362,8 @@ class CH_2D_Multigrid_Solver_relaxed:
         return self.LinOp(coeffmatrix, b)
 
     def v_cycle(self) -> None:
-        self.c = elyps_solver(
-            self.c,
-            self.phase_small,
-            self.len_small,
-            self.width_small,
-            self.alpha,
-            self.h,
-            200,
-        )
-
         # TODO more (v_1,v_2) smoothing steps
+        self.solve_elyps(40)
         self.SMOOTH(40)
 
         # extract (d,r) as array operations
@@ -507,4 +475,15 @@ class CH_2D_Multigrid_Solver_relaxed:
         """
         return Interpolate(
             array, self.len_large, self.width_large, self.len_small, self.width_small
+        )
+
+    def solve_elyps(self, n: int) -> None:
+        self.c = elyps_solver(
+            self.c,
+            self.phase_small,
+            self.len_small,
+            self.width_small,
+            self.alpha,
+            self.h,
+            n,
         )
