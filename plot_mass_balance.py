@@ -21,8 +21,12 @@ def plot(path: str, dir: str, savedir: str) -> None:
         balance = []
         for i in range(phase_data.shape[0]):
             balance += [np.sum(phase_data[i])]
-        plt.plot(balance)
+        balance_scaled = np.array(balance) * 2**-12  # 'number of gridcells in test
+        ax = plt.gca()
+        # ax.set_ylim([-1, 1])
+        plt.plot(balance_scaled)
         plt.savefig(imgpath + f"{d}_balance.png")
+        plt.close()
 
 
 def main() -> None:
