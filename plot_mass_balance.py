@@ -12,7 +12,7 @@ def plot(path: str, dir: str, savedir: str) -> None:
     for d in dataset:
         data = np.load(f"{path}/{dir}/{d}.npz")
         phase_data = data["phase"]
-        imgpath = f"{path}/{savedir}/{d}/"
+        imgpath = f"{path}/{savedir}/"
         print(f"Shape of data: {phase_data.shape}")
         if not os.path.exists(imgpath):
             os.mkdir(imgpath)
@@ -22,7 +22,7 @@ def plot(path: str, dir: str, savedir: str) -> None:
         for i in range(phase_data.shape[0]):
             balance += [np.sum(phase_data[i])]
         plt.plot(balance)
-        plt.savefig(imgpath + "balance.png")
+        plt.savefig(imgpath + f"{d}_balance.png")
 
 
 def main() -> None:

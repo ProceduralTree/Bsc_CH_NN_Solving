@@ -33,15 +33,17 @@ def main() -> None:
     pass
 
 
-def gen_data() -> None:
+def gen_data(experiment_name: str) -> None:
     lock = Lock()
     dataset = [
-        (tu.sphere_phase(10), 100, "sphere", lock),
-        (tu.square_phase(), 100, "square", lock),
+        (tu.sphere_phase(10), 100, f"{experiment_name}/sphere", lock),
+        (tu.square_phase(), 100, f"{experiment_name}/square", lock),
     ]
 
     for k in range(10):
-        dataset += [(tu.k_squares_phase(k, 10), 10, f"{k}_square", lock)]
+        dataset += [
+            (tu.k_squares_phase(k, 10), 100, f"{experiment_name}/{k}_square", lock)
+        ]
 
     for data in dataset:
         Process(target=tu.generate_train_data, args=data).start()

@@ -290,7 +290,7 @@ class CH_2D_Multigrid_Solver:
             self.len_small,
             self.width_small,
             v,
-            adaptive=True,
+            adaptive=False,
         )
         pass
 
@@ -462,12 +462,12 @@ class CH_2D_Multigrid_Solver:
         pass
 
     def solve(self, iterations: int, iteration_depth: int) -> None:
-        for i in trange(iterations):
+        for i in range(iterations):
             self.set_xi_and_psi()
             self.v_cycle(iteration_depth)
         pass
 
-    def set_xi_and_psi(self):
+    def set_xi_and_psi(self) -> None:
         self.xi[1:-1, 1:-1] = np.array(
             [
                 [
