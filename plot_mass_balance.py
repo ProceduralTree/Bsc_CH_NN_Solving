@@ -30,7 +30,7 @@ def plot(path: str, dir: str, savedir: str) -> None:
 
 
 def main() -> None:
-    path = "/home/proceduraltree/Projects/Bsc_CH_NN_Solving"
+    path = "/home/jon/Projects/Bsc_CH_NN_Solving"
     plot(path, "data/experiments", "images")
 
 

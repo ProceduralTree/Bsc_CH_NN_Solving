@@ -260,12 +260,20 @@ Discretization of the PDE
 - \nabla_d \cdot  (G_{ij} \nabla_d c_{ij}^\alpha) + \alpha  c_{ij}^\alpha &= \alpha \phi_{ij}^\alpha \\
 - (\frac{1}{h}(G_{i+\frac{1}{2}j} \nabla c^\alpha_{i+\frac{1}{2}j} + G_{ij+\frac{1}{2}} \nabla c^\alpha_{ij+\frac{1}{2}}) &  \\
 - (G_{i-\frac{1}{2}j} \nabla c^\alpha_{i-\frac{1}{2}j} + G_{ij-\frac{1}{2}} \nabla c^\alpha_{ij-\frac{1}{2}})) + \alpha  c_{ij}^\alpha   &= \alpha  \phi_{ij}^\alpha \\
-\frac{1}{h^2} ( G_{i+\frac{1}{2}j}(c_{i+1j}^\alpha - c_{ij}^\alpha) & \\
+-\frac{1}{h^2} ( G_{i+\frac{1}{2}j}(c_{i+1j}^\alpha - c_{ij}^\alpha) & \\
 +G_{ij+\frac{1}{2}}(c_{ij+1}^\alpha - c_{ij}^\alpha) &\\
 +G_{i-\frac{1}{2}j}(c_{i-1j}^\alpha - c_{ij}^\alpha)&\\
 +G_{ij-\frac{1}{2}}(c_{ij-1}^\alpha - c_{ij}^\alpha)) + \alpha  c_{ij}^\alpha &=\alpha  \phi_{ij}^\alpha \\
 \end{align*}
 proposed simple solver:
+Let \( F, dF \) be:
+\begin{align*}
+F(x) &= - \frac{1}{h^2}(\\
+ & G_{i+\frac{1}{2}j} c_{i+1j}^\alpha  +G_{i-\frac{1}{2}j} c_{i-1j}^\alpha \\
+ +&G_{ij+\frac{1}{2}} c_{ij+1}^\alpha  + G_{ij-\frac{1}{2}}c_{ij-1}^\alpha \\
++& (G_{i+\frac{1}{2}j} +G_{i-\frac{1}{2}j}+ G_{ij+\frac{1}{2}}+  G_{ij-\frac{1}{2}}) c_{ij}^\alpha
+\end{align*}
+
 
 solve equation for \( c_{ij}^\alpha  \) and then iteratively update the entire phasefield using the already updated values:
 

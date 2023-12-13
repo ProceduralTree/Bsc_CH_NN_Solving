@@ -92,7 +92,8 @@ def __G_h(i, j, len_small, width_small) -> float:
     ---------------
     1 if index i,j is in bounds(without padding) and 0 else
     """
-    if 0 < i < len_small + 1 and 0 < j < width_small + 1:
+    # TODO fix wrong inequatities check for right inclusion of boundry
+    if 1 < i < len_small + 1 and 0 < j < width_small + 1:
         return 1.0
     return 0.0
 

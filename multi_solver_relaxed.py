@@ -1,6 +1,7 @@
 import numpy as np
 from numba import njit
 import numba_scipy
+import testUtils as tu
 
 import scipy.optimize as sp
 from numpy.typing import NDArray
@@ -22,7 +23,7 @@ def elyps_solver(
     n: int,
 ) -> NDArray[np.float64]:
     maxiter = 100
-    tol = 1.48e-10
+    tol = 1.48e-8
     for i in range(n):
         for i in range(1, len + 1):
             for j in range(1, width + 1):
@@ -32,10 +33,12 @@ def elyps_solver(
                     + __G_h(i, j + 0.5, len, width)
                     + __G_h(i, j - 0.5, len, width)
                 )
-
                 x = c[i, j]
                 for iter in range(maxiter):
-                    F = (
+                    # if iter == maxiter - 2:
+                    # print(iter)
+                    # raise Warning("solver might not converge")
+                    F = -1 * (
                         h**-2
                         * (
                             __G_h(i + 0.5, j, len, width) * c[i + 1, j] ** alpha
@@ -43,20 +46,45 @@ def elyps_solver(
                             + __G_h(i, j + 0.5, len, width) * c[i, j + 1] ** alpha
                             + __G_h(i, j - 0.5, len, width) * c[i, j - 1] ** alpha
                         )
-                        - (bordernumber) * x**alpha
+                        - h**-2 * bordernumber * x**alpha
                         - alpha * x**alpha
                         - alpha * phase[i, j] ** alpha
                     )
-                    dF = bordernumber + alpha**2 * x ** (alpha - 1)
+
+                    F_h = -1 * (
+                        h**-2
+                        * (
+                            __G_h(i + 0.5, j, len, width) * c[i + 1, j] ** alpha
+                            + __G_h(i - 0.5, j, len, width) * c[i - 1, j] ** alpha
+                            + __G_h(i, j + 0.5, len, width) * c[i, j + 1] ** alpha
+                            + __G_h(i, j - 0.5, len, width) * c[i, j - 1] ** alpha
+                        )
+                        - h**-2 * bordernumber * (x + 1e-2) ** alpha
+                        - alpha * (x + 1e-2) ** alpha
+                        - alpha * phase[i, j] ** alpha
+                    )
+                    if False:
+                        dF = bordernumber * alpha**2 * x ** (
+                            alpha - 1
+                        ) + alpha**2 * x ** (alpha - 1)
+                    else:
+                        dF = 1e2 * (F_h - F)
+
                     if dF == 0:
                         raise RuntimeError(
                             "ERROR newton iteration in elyps solver did not converge, dF was 0"
                         )
+
                     step = F / dF
-                    x1 = x - step
-                    if abs(x - x1) > tol:
+                    x = x - step
+                    if abs(step) < tol:
                         break
-                    x = x1
+                    if abs(step) > 1e8:
+                        print("Step:")
+                        print(step)
+                        print("Iter:")
+                        print(iter)
+                        raise RuntimeError("WTF why the solver so large")
 
                 c[i, j] = x
     return c
@@ -78,7 +106,7 @@ def SMOOTH_relaxed_njit(
     alpha: float,
 ) -> Tuple[NDArray[np.float64], NDArray[np.float64]]:
     maxiter = 100
-    tol = 1.48e-10
+    tol = 1.48e-8
     for k in range(v):
         for i in range(1, len_small + 1):
             for j in range(1, width_small + 1):
@@ -86,6 +114,8 @@ def SMOOTH_relaxed_njit(
                 y = 0
                 # implement newton iteration
                 for iter in range(maxiter):
+                    if iter == maxiter - 1:
+                        raise Warning("solver might not converge")
                     y = (
                         x * dt**-1
                         - xi[i, j]
@@ -202,7 +232,7 @@ class CH_2D_Multigrid_Solver_relaxed:
         self.mu_small[1:-1, 1:-1] = wprime(self.phase_small[1:-1, 1:-1])
         self.xi = np.zeros(self.phase_small.shape)
         self.psi = np.zeros(self.phase_small.shape)
-        self.alpha = 200
+        self.alpha = 10
         self.c = np.zeros(self.phase_small.shape)
         pass
 
@@ -487,3 +517,11 @@ class CH_2D_Multigrid_Solver_relaxed:
             self.h,
             n,
         )
+
+
+def test_solver() -> CH_2D_Multigrid_Solver_relaxed:
+    solver = CH_2D_Multigrid_Solver_relaxed(
+        tu.wprime, tu.k_spheres_phase(5, 5), 1e-3, 1e-3, 1e-3
+    )
+    solver.c = solver.phase_small
+    return solver
