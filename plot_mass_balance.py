@@ -25,13 +25,13 @@ def plot(path: str, dir: str, savedir: str) -> None:
         ax = plt.gca()
         # ax.set_ylim([-1, 1])
         plt.plot(balance_scaled)
-        plt.savefig(imgpath + f"{d}_balance.png")
+        plt.savefig(imgpath + f"balance_{d}.png")
         plt.close()
 
 
 def main() -> None:
-    path = "/home/jon/Projects/Bsc_CH_NN_Solving"
-    plot(path, "data/experiments", "images")
+    path = "/home/proceduraltree/Projects/Bsc_CH_NN_Solving"
+    plot(path, "data/new_boundry", "images")
 
 
 if __name__ == "__main__":

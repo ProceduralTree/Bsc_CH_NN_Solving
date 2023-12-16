@@ -6,6 +6,7 @@ from multi_solver import CH_2D_Multigrid_Solver
 from multi_solver import SMOOTH_jit
 from numpy.random import Generator, PCG64
 import random
+import os
 
 SIZE = 32
 SEED = 42

@@ -93,7 +93,7 @@ def __G_h(i, j, len_small, width_small) -> float:
     1 if index i,j is in bounds(without padding) and 0 else
     """
     # TODO fix wrong inequatities check for right inclusion of boundry
-    if 1 < i < len_small + 1 and 0 < j < width_small + 1:
+    if 1 <= i <= len_small and 1 <= j <= width_small:
         return 1.0
     return 0.0
 
@@ -260,7 +260,7 @@ class CH_2D_Multigrid_Solver:
         ---------------
         1 if index i,j is in bounds(without padding) and 0 else
         """
-        if 0 < i < self.len_small + 1 and 0 < j < self.width_small + 1:
+        if 1 <= i <= self.len_small and 1 <= j <= self.width_small:
             return 1
         return 0
 
@@ -272,7 +272,7 @@ class CH_2D_Multigrid_Solver:
         ---------------
         1 if index i,j is in bounds(without padding) and 0 else
         """
-        if 0 < i < self.len_large + 1 and 0 < j < self.width_large + 1:
+        if 1 <= i <= self.len_large and 1 <= j <= self.width_large:
             return 1
         return 0
 

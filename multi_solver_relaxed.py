@@ -1,6 +1,5 @@
 import numpy as np
 from numba import njit
-import numba_scipy
 import testUtils as tu
 
 import scipy.optimize as sp
@@ -33,7 +32,7 @@ def elyps_solver(
                     + __G_h(i, j + 0.5, len, width)
                     + __G_h(i, j - 0.5, len, width)
                 )
-                x = c[i, j]
+                x = c[i, j] + 0.01
                 for iter in range(maxiter):
                     # if iter == maxiter - 2:
                     # print(iter)
@@ -46,8 +45,8 @@ def elyps_solver(
                             + __G_h(i, j + 0.5, len, width) * c[i, j + 1] ** alpha
                             + __G_h(i, j - 0.5, len, width) * c[i, j - 1] ** alpha
                         )
-                        - h**-2 * bordernumber * x**alpha
-                        - alpha * x**alpha
+                        + h**-2 * bordernumber * x**alpha
+                        + alpha * x**alpha
                         - alpha * phase[i, j] ** alpha
                     )
 
@@ -59,14 +58,14 @@ def elyps_solver(
                             + __G_h(i, j + 0.5, len, width) * c[i, j + 1] ** alpha
                             + __G_h(i, j - 0.5, len, width) * c[i, j - 1] ** alpha
                         )
-                        - h**-2 * bordernumber * (x + 1e-2) ** alpha
-                        - alpha * (x + 1e-2) ** alpha
+                        + h**-2 * bordernumber * (x + 1e-2) ** alpha
+                        + alpha * (x + 1e-2) ** alpha
                         - alpha * phase[i, j] ** alpha
                     )
-                    if False:
-                        dF = bordernumber * alpha**2 * x ** (
+                    if True:
+                        dF = -1 * h**-2 * alpha**2 * x ** (
                             alpha - 1
-                        ) + alpha**2 * x ** (alpha - 1)
+                        ) + bordernumber * alpha**2 * x ** (alpha - 1)
                     else:
                         dF = 1e2 * (F_h - F)
 
@@ -79,7 +78,7 @@ def elyps_solver(
                     x = x - step
                     if abs(step) < tol:
                         break
-                    if abs(step) > 1e8:
+                    if abs(step) > 1e16:
                         print("Step:")
                         print(step)
                         print("Iter:")
@@ -523,5 +522,4 @@ def test_solver() -> CH_2D_Multigrid_Solver_relaxed:
     solver = CH_2D_Multigrid_Solver_relaxed(
         tu.wprime, tu.k_spheres_phase(5, 5), 1e-3, 1e-3, 1e-3
     )
-    solver.c = solver.phase_small
     return solver

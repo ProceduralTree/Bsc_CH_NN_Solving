@@ -8,6 +8,7 @@ import testUtils as tu
 import numpy as np
 from multi_solver import CH_2D_Multigrid_Solver
 from multi_solver import SMOOTH_jit
+import os
 
 
 from multiprocessing import Lock, Process
@@ -35,6 +36,8 @@ def main() -> None:
 
 def gen_data(experiment_name: str) -> None:
     lock = Lock()
+    if not os.path.exists(f"data/{experiment_name}"):
+        os.mkdir(f"data/{experiment_name}")
     dataset = [
         (tu.sphere_phase(10), 100, f"{experiment_name}/sphere", lock),
         (tu.square_phase(), 100, f"{experiment_name}/square", lock),
