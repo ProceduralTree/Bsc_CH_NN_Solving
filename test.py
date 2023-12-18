@@ -9,7 +9,7 @@ import numpy as np
 from multi_solver import CH_2D_Multigrid_Solver
 from multi_solver import SMOOTH_jit
 import os
-
+from pydantic import BaseModel
 
 from multiprocessing import Lock, Process
 
