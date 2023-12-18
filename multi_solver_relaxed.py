@@ -12,6 +12,84 @@ from multi_solver import Interpolate, Restrict, __G_h
 
 
 @njit
+def alternative_el_solver(
+    c: NDArray[np.float64],
+    phase: NDArray[np.float64],
+    len: int,
+    width: int,
+    alpha: float,
+    h: float,
+    n: int,
+) -> NDArray[np.float64]:
+    maxiter = 100
+    tol = 1.48e-8
+    for i in range(n):
+        for i in range(1, len + 1):
+            for j in range(1, width + 1):
+                bordernumber = (
+                    __G_h(i + 0.5, j, len, width)
+                    + __G_h(i - 0.5, j, len, width)
+                    + __G_h(i, j + 0.5, len, width)
+                    + __G_h(i, j - 0.5, len, width)
+                )
+                x = c[i, j] + 0.01
+                for iter in range(maxiter):
+                    # if iter == maxiter - 2:
+                    # print(iter)
+                    # raise Warning("solver might not converge")
+                    F = -1 * (
+                        h**-2
+                        * (
+                            __G_h(i + 0.5, j, len, width) * c[i + 1, j] ** alpha
+                            + __G_h(i - 0.5, j, len, width) * c[i - 1, j] ** alpha
+                            + __G_h(i, j + 0.5, len, width) * c[i, j + 1] ** alpha
+                            + __G_h(i, j - 0.5, len, width) * c[i, j - 1] ** alpha
+                        )
+                        + h**-2 * bordernumber * x**alpha
+                        + alpha * x**alpha
+                        - alpha * phase[i, j] ** alpha
+                    )
+
+                    F_h = -1 * (
+                        h**-2
+                        * (
+                            __G_h(i + 0.5, j, len, width) * c[i + 1, j] ** alpha
+                            + __G_h(i - 0.5, j, len, width) * c[i - 1, j] ** alpha
+                            + __G_h(i, j + 0.5, len, width) * c[i, j + 1] ** alpha
+                            + __G_h(i, j - 0.5, len, width) * c[i, j - 1] ** alpha
+                        )
+                        + h**-2 * bordernumber * (x + 1e-2) ** alpha
+                        + alpha * (x + 1e-2) ** alpha
+                        - alpha * phase[i, j] ** alpha
+                    )
+                    if True:
+                        dF = -1 * h**-2 * alpha**2 * x ** (
+                            alpha - 1
+                        ) + bordernumber * alpha**2 * x ** (alpha - 1)
+                    else:
+                        dF = 1e2 * (F_h - F)
+
+                    if dF == 0:
+                        raise RuntimeError(
+                            "ERROR newton iteration in elyps solver did not converge, dF was 0"
+                        )
+
+                    step = F / dF
+                    x = x - step
+                    if abs(step) < tol:
+                        break
+                    if abs(step) > 1e16:
+                        print("Step:")
+                        print(step)
+                        print("Iter:")
+                        print(iter)
+                        raise RuntimeError("WTF why the solver so large")
+
+                c[i, j] = x
+    return c
+
+
+@njit
 def elyps_solver(
     c: NDArray[np.float64],
     phase: NDArray[np.float64],
