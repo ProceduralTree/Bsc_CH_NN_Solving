@@ -21,7 +21,10 @@ def alternative_el_solver(
     h: float,
     n: int,
 ) -> NDArray[np.float64]:
-    maxiter = 100
+    """
+    solves elyptical equation for x^a
+    """
+    maxiter = 10000
     tol = 1.48e-8
     for i in range(n):
         for i in range(1, len + 1):
@@ -34,19 +37,23 @@ def alternative_el_solver(
                 )
                 x = c[i, j] + 0.01
                 for iter in range(maxiter):
-                    # if iter == maxiter - 2:
-                    # print(iter)
-                    # raise Warning("solver might not converge")
+                    if iter == maxiter - 2:
+                        print("Iter:")
+                        print(iter)
+                        print("c:")
+                        print(x)
+
+                        raise Warning("solver might not converge")
                     F = -1 * (
                         h**-2
                         * (
-                            __G_h(i + 0.5, j, len, width) * c[i + 1, j] ** alpha
-                            + __G_h(i - 0.5, j, len, width) * c[i - 1, j] ** alpha
-                            + __G_h(i, j + 0.5, len, width) * c[i, j + 1] ** alpha
-                            + __G_h(i, j - 0.5, len, width) * c[i, j - 1] ** alpha
+                            __G_h(i + 0.5, j, len, width) * c[i + 1, j]
+                            + __G_h(i - 0.5, j, len, width) * c[i - 1, j]
+                            + __G_h(i, j + 0.5, len, width) * c[i, j + 1]
+                            + __G_h(i, j - 0.5, len, width) * c[i, j - 1]
                         )
-                        + h**-2 * bordernumber * x**alpha
-                        + alpha * x**alpha
+                        + h**-2 * bordernumber * x
+                        + alpha * x
                         - alpha * phase[i, j] ** alpha
                     )
 
@@ -63,9 +70,7 @@ def alternative_el_solver(
                         - alpha * phase[i, j] ** alpha
                     )
                     if True:
-                        dF = -1 * h**-2 * alpha**2 * x ** (
-                            alpha - 1
-                        ) + bordernumber * alpha**2 * x ** (alpha - 1)
+                        dF = -1 * h**-2 * alpha + bordernumber
                     else:
                         dF = 1e2 * (F_h - F)
 
@@ -309,7 +314,7 @@ class CH_2D_Multigrid_Solver_relaxed:
         self.mu_small[1:-1, 1:-1] = wprime(self.phase_small[1:-1, 1:-1])
         self.xi = np.zeros(self.phase_small.shape)
         self.psi = np.zeros(self.phase_small.shape)
-        self.alpha = 10
+        self.alpha = 100
         self.c = np.zeros(self.phase_small.shape)
         pass
 
@@ -585,7 +590,7 @@ class CH_2D_Multigrid_Solver_relaxed:
         )
 
     def solve_elyps(self, n: int) -> None:
-        self.c = elyps_solver(
+        self.c = alternative_el_solver(
             self.c,
             self.phase_small,
             self.len_small,
@@ -600,4 +605,5 @@ def test_solver() -> CH_2D_Multigrid_Solver_relaxed:
     solver = CH_2D_Multigrid_Solver_relaxed(
         tu.wprime, tu.k_spheres_phase(5, 5), 1e-3, 1e-3, 1e-3
     )
+    solver.c = solver.phase_small
     return solver
