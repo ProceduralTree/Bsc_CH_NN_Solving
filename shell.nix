@@ -10,6 +10,22 @@ let
       seaborn
       scipy
       pydantic
+      # (buildPythonPackage rec {
+      #   pname = "pydantic";
+      #   format = "pyproject";
+      #   version = "2.5.2";
+      #   src = fetchPypi {
+      #     inherit pname version;
+      #     sha256 = "sha256-/xd7pkxvr3PXr6LoytOP1FbA2+AcmVTnEDgAHNFabt0=";
+      #   };
+      #   doCheck = false;
+      #   propagatedBuildInputs = [
+      #     pkgs.python310Packages.typing-extensions
+      #     pkgs.python310Packages.annotated-types
+      #     pkgs.python310Packages.hatchling
+      #     # Specify dependencies
+      #   ];
+      # })
       tqdm
 
       # Dev  deps
@@ -50,7 +66,7 @@ in pkgs.mkShell {
     #ncurses5
     #stdenv.cc
     #binutils
-    (python3.withPackages pypackages)
+    (python310.withPackages pypackages)
   ];
   # shellHook = ''
   #   export CUDA_PATH=${pkgs.cudatoolkit}
