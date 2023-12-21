@@ -1,3 +1,6 @@
+import seaborn as sns
+import matplotlib.pyplot as plt
+
 import numpy as np
 from numba import njit
 import testUtils as tu
@@ -314,7 +317,7 @@ class CH_2D_Multigrid_Solver_relaxed:
         self.mu_small[1:-1, 1:-1] = wprime(self.phase_small[1:-1, 1:-1])
         self.xi = np.zeros(self.phase_small.shape)
         self.psi = np.zeros(self.phase_small.shape)
-        self.alpha = 100
+        self.alpha = 11
         self.c = np.zeros(self.phase_small.shape)
         pass
 
@@ -605,5 +608,10 @@ def test_solver() -> CH_2D_Multigrid_Solver_relaxed:
     solver = CH_2D_Multigrid_Solver_relaxed(
         tu.wprime, tu.k_spheres_phase(5, 5), 1e-3, 1e-3, 1e-3
     )
-    solver.c = solver.phase_small
+    solver.c = solver.phase_small**solver.alpha
     return solver
+
+
+def plot(arr: NDArray[np.float64]) -> None:
+    sns.heatmap(arr)
+    plt.show()
