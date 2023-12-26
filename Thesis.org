@@ -1,6 +1,3 @@
-:PROPERTIES:
-:ID:       205127bc-bc81-41a2-b5e4-509fc6a555b7
-:END:
 #+title: Bachelor Thesis
 #+bibliography: "~/org/resources/bibliography/refs.bib"
 #+Options: tex:dvisvgm
@@ -135,8 +132,6 @@ G_{ij} &=
 # setup plotting
 
 For testing and later training , a multitude o different phasefields where used. notably an assortment of randomly placed circles, squares, and arbitrary generated values
-
-
 #+begin_src python :session :results none :exports none
 import testUtils as tu
 import matplotlib.pyplot as plt
@@ -151,7 +146,7 @@ sns.set_theme()
 #+name: dots
 #+header: :file images/phase.png
 #+begin_src python :results graphics file output :eval never-export :session
-tu.SEED = 9
+tu.SEED = 98
 test_phase = tu.k_spheres_phase(5,6)
 plt.figure()
 sns.heatmap(test_phase)
@@ -159,8 +154,6 @@ sns.heatmap(test_phase)
 
 #+RESULTS: dots
 [[file:images/phase.png]]
-
-
 
  #+name: points
 #+header: :file images/phase2.png
@@ -254,9 +247,9 @@ or in terms of the characteristic function:
 \begin{align*}
 - \nabla \cdot  (G \nabla c^\alpha) + \alpha c^\alpha  = \alpha \phi ^\alpha
 \end{align*}
-
-*** Discretization :ATTACH:
-Discretization of the PDE
+In  a similar manner to the first solver this PDE is solved with a finite difference scheme using the same discretisations as bevore:
+*** Discretization
+the Discretization of the PDE expands the differential opperators in the same way
 \begin{align*}
 - \nabla_d \cdot  (G_{ij} \nabla_d c_{ij}^\alpha) + \alpha  c_{ij}^\alpha &= \alpha \phi_{ij}^\alpha \\
 - (\frac{1}{h}(G_{i+\frac{1}{2}j} \nabla c^\alpha_{i+\frac{1}{2}j} + G_{ij+\frac{1}{2}} \nabla c^\alpha_{ij+\frac{1}{2}}) &  \\
