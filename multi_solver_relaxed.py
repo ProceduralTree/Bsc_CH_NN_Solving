@@ -1,6 +1,7 @@
 import seaborn as sns
 import matplotlib.pyplot as plt
 
+import math
 import numpy as np
 from numba import njit
 import testUtils as tu
@@ -25,11 +26,11 @@ def alternative_el_solver(
     n: int,
 ) -> NDArray[np.float64]:
     """
-    solves elyptical equation for x^a
+    solves elyptical equation for \(x^\alpha\)
     """
     maxiter = 10000
     tol = 1.48e-8
-    for i in range(n):
+    for k in range(n):
         for i in range(1, len + 1):
             for j in range(1, width + 1):
                 bordernumber = (
@@ -47,8 +48,9 @@ def alternative_el_solver(
                         print(x)
 
                         raise Warning("solver might not converge")
-                    F = -1 * (
-                        h**-2
+                    F = (
+                        -1
+                        * h**-2
                         * (
                             __G_h(i + 0.5, j, len, width) * c[i + 1, j]
                             + __G_h(i - 0.5, j, len, width) * c[i - 1, j]
@@ -60,22 +62,7 @@ def alternative_el_solver(
                         - alpha * phase[i, j] ** alpha
                     )
 
-                    F_h = -1 * (
-                        h**-2
-                        * (
-                            __G_h(i + 0.5, j, len, width) * c[i + 1, j] ** alpha
-                            + __G_h(i - 0.5, j, len, width) * c[i - 1, j] ** alpha
-                            + __G_h(i, j + 0.5, len, width) * c[i, j + 1] ** alpha
-                            + __G_h(i, j - 0.5, len, width) * c[i, j - 1] ** alpha
-                        )
-                        + h**-2 * bordernumber * (x + 1e-2) ** alpha
-                        + alpha * (x + 1e-2) ** alpha
-                        - alpha * phase[i, j] ** alpha
-                    )
-                    if True:
-                        dF = -1 * h**-2 * alpha + bordernumber
-                    else:
-                        dF = 1e2 * (F_h - F)
+                    dF = -1 * alpha + h**-2 * bordernumber
 
                     if dF == 0:
                         raise RuntimeError(
@@ -109,7 +96,7 @@ def elyps_solver(
 ) -> NDArray[np.float64]:
     maxiter = 100
     tol = 1.48e-8
-    for i in range(n):
+    for k in range(n):
         for i in range(1, len + 1):
             for j in range(1, width + 1):
                 bordernumber = (
@@ -123,8 +110,9 @@ def elyps_solver(
                     # if iter == maxiter - 2:
                     # print(iter)
                     # raise Warning("solver might not converge")
-                    F = -1 * (
-                        h**-2
+                    F = (
+                        -1
+                        * h**-2
                         * (
                             __G_h(i + 0.5, j, len, width) * c[i + 1, j] ** alpha
                             + __G_h(i - 0.5, j, len, width) * c[i - 1, j] ** alpha
@@ -149,9 +137,9 @@ def elyps_solver(
                         - alpha * phase[i, j] ** alpha
                     )
                     if True:
-                        dF = -1 * h**-2 * alpha**2 * x ** (
+                        dF = -1 * alpha**2 * x ** (
                             alpha - 1
-                        ) + bordernumber * alpha**2 * x ** (alpha - 1)
+                        ) + h**-2 * bordernumber * alpha**2 * x ** (alpha - 1)
                     else:
                         dF = 1e2 * (F_h - F)
 
@@ -190,7 +178,7 @@ def SMOOTH_relaxed_njit(
     v: int,
     alpha: float,
 ) -> Tuple[NDArray[np.float64], NDArray[np.float64]]:
-    maxiter = 100
+    maxiter = 10000
     tol = 1.48e-8
     for k in range(v):
         for i in range(1, len_small + 1):
@@ -199,7 +187,11 @@ def SMOOTH_relaxed_njit(
                 y = 0
                 # implement newton iteration
                 for iter in range(maxiter):
-                    if iter == maxiter - 1:
+                    if iter == maxiter - 1 or math.isnan(x):
+                        print("Iter:")
+                        print(iter)
+                        print("xval:")
+                        print(x)
                         raise Warning("solver might not converge")
                     y = (
                         x * dt**-1
@@ -226,7 +218,7 @@ def SMOOTH_relaxed_njit(
                     F = (
                         epsilon**2 * x**alpha
                         + 2 * x
-                        - epsilon**2 * c[i, j] ** alpha
+                        - epsilon**2 * c[i, j]
                         + y
                         + psi[i, j]
                     )
@@ -593,7 +585,7 @@ class CH_2D_Multigrid_Solver_relaxed:
         )
 
     def solve_elyps(self, n: int) -> None:
-        self.c = alternative_el_solver(
+        self.c = elyps_solver(
             self.c,
             self.phase_small,
             self.len_small,
