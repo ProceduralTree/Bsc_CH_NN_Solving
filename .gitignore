@@ -12,3 +12,9 @@
 /images/sphere/
 /images/7_square/
 *.blg
+*.png
+*/*/*/*/*.png
+testing/images
+testing/images/*
+testdata_*.png
+**/.png

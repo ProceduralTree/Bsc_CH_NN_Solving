@@ -29,6 +29,7 @@ let
       tqdm
 
       # Dev  deps
+      debugpy
       python-lsp-server
       python-lsp-ruff
       pylsp-mypy

@@ -5,8 +5,23 @@ import numpy as np
 import os
 
 
+def plot_large_dataset(path: str, dir: str, savedir: str):
+    dataset = os.listdir(f"{path}/{dir}")
+    differences = []
+    for datadir in dataset:
+        data = os.listdir(f"{path}/{dir}/{datadir}")
+        for d in filter(lambda x: ".npz" in x, data):
+            array = np.load(f"{path}/{dir}/{datadir}/{d}")["phase"]
+            print(array.shape)
+            differences += [np.sum(array[0]) - np.sum(array[-1])]
+    print(differences)
+    # sns.histplot(differences)
+    return differences
+
+
 def plot(path: str, dir: str, savedir: str) -> None:
     dataset = os.listdir(f"{path}/{dir}/")
+    dataset = [x for x in filter(lambda x: ".npz" in x, dataset)]
     dataset = [d.replace(".npz", "") for d in dataset]
     print(dataset)
     for d in dataset:
@@ -35,4 +50,7 @@ def main() -> None:
 
 
 if __name__ == "__main__":
+    plot_large_dataset(
+        "/home/proceduraltree/Projects/Bsc_CH_NN_Solving", "data", "images"
+    )
     pass

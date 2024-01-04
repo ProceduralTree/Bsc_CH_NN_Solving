@@ -9,6 +9,7 @@ sns.set_theme()
 
 def plot(path: str, dir: str, savedir: str) -> None:
     dataset = os.listdir(f"{path}/{dir}/")
+    dataset = [x for x in filter(lambda y: ".npz" in y, dataset)]
     dataset = [d.replace(".npz", "") for d in dataset]
     print(dataset)
     for d in dataset:
