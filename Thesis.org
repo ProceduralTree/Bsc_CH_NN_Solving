@@ -1,7 +1,8 @@
 #+title: Bachelor Thesis
 #+bibliography: "~/org/resources/bibliography/refs.bib"
+#+LATEX_HEADER: \usepackage[natbib=true]{biblatex} \DeclareFieldFormat{apacase}{#1}
+#+LATEX_HEADER: \addbibresource{~/org/resources/bibliography/refs.bib}
 #+Options: tex:dvisvgm
-#+startup: latexpreview
 
 
 
@@ -14,7 +15,7 @@ Partial Differential Equation (PDE) solving the state of a 2 Phase Fluid[cite:@W
 \end{align}
 where \( \phi\) is the so-called phase field. Demarking the different states of the fluids through an Interval \( I=[-1,1] \) and where \( \partial I = \{-1,1\} \)  represents full state of one fluid. \( \varepsilon > 0  \) is  a positive constant
 #    describing the width of the phase transition
-, and \( \mu\) is the chemical potential[cite:@Wu_2022]. While the Cahn Hillard exist in a more general form taking the fluid's mobility \( M(\Phi) \) into account, we will assume \( M(\Phi) = 1 \), simplifying the CH-Equations used in[cite:@Wu_2022][cite:@SHIN20117441] to what is stated above.
+, and \( \mu\) is the chemical potential[cite:@Wu_2022]. While the Cahn Hillard exist in a more general form taking the fluid's mobility \( M(\Phi) \) into account, we will assume \( M(\Phi) = 1 \), simplifying the CH-Equations used in [cite:@Wu_2022] [cite:@SHIN20117441] to what is stated above.
 
 
 The Advantages of the Cahn Hillard Approach as compared to traditional fluid dynamics solvers are for example: "explicit tracking of the interface"[cite:@Wu_2022], as well as "evolution of complex geometries and topological changes [...] in a natural way"[cite:@Wu_2022]
@@ -277,6 +278,5 @@ dF(x) &= -  \cdot (G_{i+\frac{1}{2}j} +G_{i-\frac{1}{2}j}+ G_{ij+\frac{1}{2}}+  
 
 solve equation for \( c_{ij}^\alpha  \) and then iteratively update the entire phasefield using the already updated values:
 * References
-\printbibliography
-
+\printbibliograpy
 #  LocalWords:  Discretization
