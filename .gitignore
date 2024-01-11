@@ -16,3 +16,4 @@ testing/images/*
 testdata_*.png
 **/.png
 **/*.png
+/org-tex-EZ6ey1.aux
