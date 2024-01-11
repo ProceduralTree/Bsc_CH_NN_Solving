@@ -3,23 +3,24 @@
 * TODO Tests [1/2]
 - [X] try different:
   - [X] epsilon
-  - [X] gridsizes
-  - [X] timesteps
-- [ ] More grid variants 832x32 , 64,64 , 512x512)
+  - [X] grid sizes
+  - [X] time steps
+- [ ] More grid variants (32x32, 64,64, 512x512 )
 * TODO Enable adaptive SMOOTH operation
-** Look for non adaptive differences
+** Look for non-adaptive differences
 
 * TODO Data gen for training [1/3]
-- [X] initial test date phasefield , and  potential
-- [ ] elyptical PDE data
+- [X] initial test date phase field, and potential
+- [ ] elliptical PDE data
 - [-] more varied training data / larger datasets [2/4]
   - [ ] different seeds
-  - [X] sphere phasefield
-  - [X] squares phasefield
-  - [ ] random phasefields
-* TODO write elyptical PDE solver [2/4]
+  - [X] sphere phase field
+  - [X] squares phase field
+  - [ ] random phase fields
+Tested multiple input. Output was useless as most iterations had unusable epsilon and did not calculate anything
+* TODO write elliptical PDE solver [3/4]
 - [X] outline of implementation
-- [ ] check newton derivative
+- [X] check newton derivative
 - [X] use own newton solver for numba
 - [ ] test
 
@@ -28,5 +29,5 @@
 * TODO check v_cycle implementation
 
 * TODO test errors
-
-
+* TODO Thesis [0/1]
+- [ ] correct wrong relaxation (forgot \(\phi^\alpha\) term)
