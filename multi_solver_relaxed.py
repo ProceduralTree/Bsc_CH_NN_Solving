@@ -585,7 +585,7 @@ class CH_2D_Multigrid_Solver_relaxed:
         )
 
     def solve_elyps(self, n: int) -> None:
-        self.c = elyps_solver(
+        self.c = alternative_el_solver(
             self.c,
             self.phase_small,
             self.len_small,
