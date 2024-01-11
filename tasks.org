@@ -6,6 +6,9 @@
   - [X] grid sizes
   - [X] time steps
 - [ ] More grid variants (32x32, 64,64, 512x512 )
+** TODO Rework Newton solver to analytical solution
+rework
+[[file:~/Projects/Bsc_CH_NN_Solving/multi_solver_relaxed.py::for iter in range(maxiter):]]
 * TODO Enable adaptive SMOOTH operation
 ** Look for non-adaptive differences
 
