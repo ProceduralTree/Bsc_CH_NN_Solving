@@ -4,12 +4,20 @@
 *.sync-conflict-*.*
 *.mac
 *.lock
-/images/9_square/
-/images/8_square/
 /__pycache__/
 /_minted-Thesis/
 /images/phase.png
 /images/sphere/
 /images/7_square/
 *.blg
+<<<<<<< HEAD
 /images/9_5_square.gif
+=======
+*.png
+testing/images
+testing/images/*
+testdata_*.png
+**/.png
+**/*.png
+/org-tex-EZ6ey1.aux
+>>>>>>> origin/main

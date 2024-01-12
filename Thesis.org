@@ -1,46 +1,49 @@
 #+title: Bachelor Thesis
 #+bibliography: "~/org/resources/bibliography/refs.bib"
+#+LATEX_HEADER: \usepackage[natbib=true]{biblatex} \DeclareFieldFormat{apacase}{#1}
+#+LATEX_HEADER: \addbibresource{~/org/resources/bibliography/refs.bib}
 #+Options: tex:dvisvgm
-#+startup: latexpreview
 
 
 * Cahn Hillard Equation Overview
 Partial Differential Equation (PDE) solving the state of a 2 Phase Fluid[cite:@Wu_2022]. The form of the Cahn Hillard Equation used for the remainder of this thesis is:
+#+name: eq:CH
 \begin{align}
-\label{eq:CHeq}
 \phi _t(x,t) &= \Delta  \mu \\
 \mu &= - \varepsilon^2 \Delta \phi   + W'(\phi)
 \end{align}
-where \( \phi\) is the so-called phase field. Demarking the different states of the fluids through an Interval \( I=[-1,1] \) and where \( \partial I = \{-1,1\} \)  represents full state of one fluid. \( \varepsilon > 0  \) is  a positive constant
-#    describing the width of the phase transition
-, and \( \mu\) is the chemical potential[cite:@Wu_2022]. While the Cahn Hillard exist in a more general form taking the fluid's mobility \( M(\Phi) \) into account, we will assume \( M(\Phi) = 1 \), simplifying the CH-Equations used in[cite:@Wu_2022][cite:@SHIN20117441] to what is stated above.
+where \( \phi\) is the so-called phase field. Demarking the different states of the fluids through an Interval \(I=[-1,1] \) and where \(\partial I = \{-1,1\} \) represents full state of one fluid. \(\varepsilon > 0 \) is  a positive constant
+# describing the width of the phase transition
+, and \(\mu\) is the chemical potential[cite:@Wu_2022]. While the Cahn Hillard exist in a more general form taking the fluid's mobility \(M(\Phi) \) into account, we will assume \(M(\Phi) = 1 \), simplifying the CH-Equations used in [cite:@Wu_2022] [cite:@SHIN20117441] to what is stated above.
 
 
 The Advantages of the Cahn Hillard Approach as compared to traditional fluid dynamics solvers are for example: "explicit tracking of the interface"[cite:@Wu_2022], as well as "evolution of complex geometries and topological changes [...] in a natural way"[cite:@Wu_2022]
+In practice it enables linear interpolation between different formulas on different phases
 ** TODO Derivation from paper
 *** Free energy
 The Cahn Hillard Equations can be motivated Using a *Ginzburg Landau* type free energy equation:
 \begin{align*}
-E^{\text{bulk}}  = \int_{  \Omega}  \frac{\varepsilon^2}{2} |\nabla \phi |^2 + W(\phi) \,dx
+E^{\text{bulk}} = \int_{\Omega} \frac{\varepsilon^2}{2} |\nabla \phi |^2 + W(\phi) \, dx
 \end{align*}
-where \( W(\phi) \) denotes the (Helmholtz) free energy density of mixing.""[cite:@Wu_2022] and will be approximated in further calculations as \( W(\phi) = \frac{(1-\phi ^2)^2}{4}\) as used in[cite:@SHIN20117441]
+where \(W(\phi) \) denotes the (Helmholtz) free energy density of mixing.""[cite:@Wu_2022] and will be approximated in further calculations as \(W(\phi) = \frac{(1-\phi ^2)^2}{4}\) as used in[cite:@SHIN20117441]
 
 The chemical potential then follows as derivative of Energy in respect to time.
 \begin{align*}
- \mu &= \frac{\delta E_{bulk}(\phi)}{\delta \phi } = -\varepsilon^2 \Delta \phi  + W'(\phi)
+ \mu &= \frac{\delta E_{bulk}(\phi)}{\delta \phi} = -\varepsilon^2 \Delta \phi + W'(\phi)
 \end{align*}
 
 *** Derivation by mass balance
 The Cahn Hillard equation then can be motivated as follows:
 consider
+#+name: eq:massbal
 \begin{equation}
-    \partial_t \phi + \nabla J  = 0
+    \partial_t \phi + \nabla J = 0
 \end{equation}
-where   *J* is mass flux. eq:massbal then states that the change in mass balances the change of the phasefield.
+where *J* is mass flux. [[eq:massbal]] then states that the change in mass balances the change of the phasefield.
 Using the no-flux boundry conditions:
 \begin{align}
-J \cdot n &= 0  & \partial\Omega &\times (0,T)\\
-\partial_n\phi  &= 0  & \partial\Omega &\times (0,T)
+J \cdot n &= 0 & \partial\Omega &\times (0,T)\\
+\partial_n\phi &= 0 & \partial\Omega &\times (0,T)
 \end{align}
 conservation of mass follows see[cite:@Wu_2022].
 
@@ -48,26 +51,27 @@ Using:
 \begin{align}
 J &= - \nabla \mu
 \end{align}
-which conceptionally sets mass flux to equalize the potential energy gradient, leads to the formulation of the CH equations as stated above. Additionally the boundary conditions evaluate to:
+which conceptionally sets mass flux to equalize the potential energy gradient, leads to the formulation of the CH equations as stated above. Additionally, the boundary conditions evaluate to:
 \begin{align*}
  - \nabla \mu &= 0 \\
-\partial_n \phi  = 0
+\partial_n \phi = 0
 \end{align*}
 ie no flow leaves and potential on the border doesn't change.
-then for \( \phi   \) then follows:
+Then for \(\phi \) then follows:
 \begin{align*}
-\frac{d}{dt}E^{bulk}(\phi(t)) &= \int_{\Omega} (\varepsilon^2 \nabla \phi \cdot \nabla \partial_t \phi + W'(\phi) \partial_t \phi) \ d x  \\
-&= - \int_{  \Omega } |\nabla \mu|^2 \ d x, & \forall t \in  (0,T)
+\frac{d}{dt}E^{bulk}(\phi(t)) &= \int_{\Omega} ( \varepsilon^2 \nabla \phi \cdot \nabla \partial_t \phi + W'(\phi) \partial_t \phi) \ d x \\
+&= - \int_{ \Omega } |\nabla \mu|^2 \ d x, & \forall t \in (0,T)
 \end{align*}
 hence the Free Energy is decreasing in time.
 * Baseline Multigrid solver:
-As baseline for further experiments a multi grid method based on finite differences by[cite:@SHIN20117441]. is used.
+As baseline for further experiments a multi grid method based on finite differences by[cite:@SHIN20117441]. Is used.    
 ** Discretization:
-it discretizes the phasefield and potential energy \( \phi, \mu  \) into a grid wise functions \( \phi_{ij}, \mu_{ij} \) and defines the partial derivatives \( D_xf_{ij}, \  D_yf_{ij} \) using the differential quotients:
+it discretizes the phasefield and potential energy \( \phi, \mu \) into a grid wise functions \(\phi_{ij}, \mu_{ij} \) and defines the partial derivatives \( D_xf_{ij}, \ D_yf_{ij} \) using the differential quotients:
 \begin{align}
 D_xf_{i+\frac{1}{2} j} &= \frac{f_{i+1j} - f_{ij}}{h} & D_yf_{ij+\frac{1}{2}} &= \frac{f_{ij+1} - f_{ij}}{h}
 \end{align}
-for \( \nabla f , \Delta f \) then follows:
+for \( \nabla f, \Delta f \) then follows:
+#+name: eq:discretization
 \begin{align*}
 \nabla_d f_{ij} &= (D_x f_{i+1j} , \ D_y f_{ij+1}) \\
  \Delta_d f_{ij} &= \frac{D_x f_{i+\frac{1}{2}j} -  D_x f_{i-\frac{1}{2}j} + D_y f_{ij+\frac{1}{2}} - D_y f_{ij-\frac{1}{2}}}{h} = \nabla_d \cdot  \nabla_d f_{ij}
@@ -108,12 +112,12 @@ W'(\phi_{ij}^n) - 2\phi_{ij}^n
 \right)
 \]
 the algorithm is then defined as:
-# #+caption: FAS Multigrid v-cycle as defined  by [cite:@SHIN20117441]
+# #+caption: FAS Multigrid v-cycle as defined by [cite:@SHIN20117441]
 
-Wherein SMOOTH consists of point-wise Gauß Seidel Relaxation , by solving /L/ for \( \overline{\phi} ,\overline{\mu} \) with the initial guess for \( \zeta^n , \psi^n \).
+Wherein SMOOTH consists of point-wise Gauß Seidel Relaxation, by solving /L/ for \( \overline{\phi} ,\overline{\mu} \) with the initial guess for \( \zeta^n , \psi^n \).
 ** adaptations to the simplified problem
 even tough this work uses rectangular domains, the adaptation of the algorithm is simplified by the domain indicator function, as well as 0 padding, in order to correctly include the boundary conditions of the CH equation.
-Therefore the internal representation of the adapted algorithm considers phasefield and potential field \( \phi , \mu \) as 2D arrays of shape \( (N_X + 2 , N_y + 2) \) in order to accommodate padding. Where N_x and N_y are the number of steps in x- / y-Direction respectively.
+Therefore, the internal representation of the adapted algorithm considers phasefield and potential field \( \phi , \mu \) as 2D arrays of shape \( (N_X + 2 , N_y + 2) \) in order to accommodate padding. Where N_x and N_y are the number of steps in x- / y-Direction respectively.
 Hence, we define the discrete domain function as:
 \begin{align*}
 G_{ij} &=
@@ -130,7 +134,7 @@ G_{ij} &=
 :END:
 # setup plotting
 
-For testing and later training , a multitude o different phasefields where used. notably an assortment of randomly placed circles, squares, and arbitrary generated values
+For testing and later training, a multitude o different phasefields where used. Notably an assortment of randomly placed circles, squares, and arbitrary generated values
 #+begin_src python :session :results none :exports none
 import testUtils as tu
 import matplotlib.pyplot as plt
@@ -185,50 +189,52 @@ sns.heatmap(solver.phase_small)
 [[file:it_40.png]]
 
 * Relaxed Problem
-In effort to decrease the order of complexity, the following relaxation to the classical CH Equation is proposed:
+In effort to decrease the order of complexity, the following relaxation to the classical Cahn Hillard Equation is proposed:
 \begin{align*}
-\partial_t \phi  &= \Delta \mu \\
+\partial_t \phi^\alpha  &= \Delta \mu \\
 \mu &= \varepsilon ^2(c^\alpha - \phi^\alpha) + W'(\phi)
 \end{align*}
-that in turn requires an additional PDE to be solved each time-step to calculate \(c\).
-here   \( c \) is the solution of the following elliptical PDE
+that in turn requires solving an additional PDE each time-step to calculate \(c\).
+ \( c \) is the solution of the following elliptical PDE
 \begin{align*}
 - \Delta c^\alpha  + \alpha c^a &= \alpha \phi ^\alpha
 \end{align*}
 
-** TODO  relaxed operators:
-the multi-grid solver proposed earlier is then adapted to the relaxed Problem by replacing the differential operators by their discrete counterparts as defined in #TODO
+** TODO relaxed operators:
+the multi-grid solver proposed earlier is then adapted to the relaxed Problem by replacing the differential operators by their discrete counterparts as defined in [[eq:discretization]]
 and expanding them
 *** L Relaxed
 for the reformulation of the iteration in terms of Operator \(L\) then follows:
 \begin{align*}
 L
 \begin{pmatrix}
-\phi ^{n+1} \\
+(\phi ^{n+1})^\alpha \\
 \mu^{n+1}
 \end{pmatrix}
 &=
 \begin{pmatrix}
-\frac{\phi^{n+1,m}_{ij}}{\Delta t} - \nabla _d \cdot (G_{ji} \nabla _d \mu^{n + \frac{1}{2},m}_{ji}) \\
-\varepsilon ^2 (c^\alpha - (\phi^{n+1,m}_{ij})^\alpha) - 2\phi ^{n+1,m}_{ij} -\mu^{n + \frac{1}{2},m}_{ji}
+\frac{(\phi^{n+1,m}_{ij})^\alpha}{\Delta t} - \nabla _d \cdot (G_{ji} \nabla _d \mu^{n + \frac{1}{2},m}_{ji}) \\
+\varepsilon ^2 (c^\alpha - (\phi^{n+1,m}_{ij})^\alpha) - 2(\phi ^{n+1,m}_{ij})^\alpha -\mu^{n + \frac{1}{2},m}_{ji}
 \end{pmatrix}
 \end{align*}
 *** SMOOTH
 and correspondingly the SMOOTH operation expands to:
 \begin{align*}
-SMOOTH( \phi^{n+1,m}_{ij}, \mu^{n + \frac{1}{2},m}_{ji}, L_h , \zeta ^n , \psi ^n )
+SMOOTH( (\phi^{n+1,m}_{ij})^\alpha, \mu^{n + \frac{1}{2},m}_{ji}, L_h , \zeta ^n , \psi ^n )
 \end{align*}
-\begin{align*}
+
+#+name: eq:discrete_relaxed_smooth
+\begin{align}
+ \varepsilon ^2 (\overline{\phi} ^{n+1,m}_{ij})^\alpha + 2 \phi ^{n+1,m}_{ij} &= \varepsilon ^2 c^\alpha  -\mu^{n + \frac{1}{2},m}_{ji}  - \psi_{ij} \\
 \overline{\mu}^{n + \frac{1}{2},m}_{ji}
 &=
-  \frac{\phi ^{n+1,m}_{ij}}{\Delta t} - \zeta^n_{ij} \\
-&- \frac{1}{h^2}\left(G_{i+\frac{1}{2}j} \mu^{n + \frac{1}{2},m}_{i+1j} +  G_{i-1j} \mu^{n + \frac{1}{2},m}_{i-1j} + G_{ij+1}  \mu^{n + \frac{1}{2},m}_{ij+1} + G_{ij-1} \mu^{n + \frac{1}{2},m}_{ij-1}\right) \\
-&\cdot  \left(G_{i+1j} + G_{i-1j} + G_{ij+1} + G_{ij-1}\right)^{-1} \\
- \varepsilon ^2 (\overline{\phi} ^{n+1,m}_{ij})^\alpha + 2 \phi ^{n+1,m}_{ij} &= \varepsilon ^2 c^\alpha  -\mu^{n + \frac{1}{2},m}_{ji}  - \psi_{ij}
-\end{align*}
-**** Proposal
+  \frac{(\phi ^{n+1,m}_{ij})^\alpha}{\Delta t} - \zeta^n_{ij} \\
+&- \frac{1}{h^2}\left(G_{i+\frac{1}{2}j} \mu^{n + \frac{1}{2},m}_{i+1j} +  G_{i-1j} \mu^{n + \frac{1}{2},m}_{i-1j} + G_{ij+1}  \mu^{n + \frac{1}{2},m}_{ij+1} + G_{ij-1} \mu^{n + \frac{1}{2},m}_{ij-1} \right) \\
+&\cdot  \left(G_{i+1j} + G_{i-1j} + G_{ij+1} + G_{ij-1}\right)^{-1}
+\end{align}
+**** Proposal1
 Since the resulting system no longer is linear, (albeit simpler in Dimension), we propose a newton method to solve second equation (in conjunction with the first one) hopefully solving this converges faster than the original multiple SMOOTH Iterations.
- The iteration solves for \( \phi ^{n+1,m}_{ij} = x \) as free variable. Therefore it follows for \( F(x) \)
+ The iteration solves for \( (\phi ^{n+1,m}_{ij})^\alpha = x \) as free variable. Therefore, it follows for \( F(x) \)
 \begin{align*}
 F(x)  &= \varepsilon ^2 x^\alpha + 2x - \varepsilon^2 c^\alpha  + y + \psi_{ij} \\
 y &= \frac{x}{\Delta t} - \zeta^n_{ij} \\
@@ -236,17 +242,26 @@ y &= \frac{x}{\Delta t} - \zeta^n_{ij} \\
 &\cdot  \left(G_{i+1j} + G_{i-1j} + G_{ij+1} + G_{ij-1}\right)^{-1} \\
 \end{align*}
 And the derivative for the iteration is
-\begin{align*}
+        \begin{align*}
 \frac{d}{dx} F(x)&= \alpha \varepsilon^2 x^{\alpha-1} + 2 + \frac{d}{dx} y  \\
 \frac{d}{dx} y  &= \frac{1}{\Delta t}
 \end{align*}
+**** Proposal2
+solve analytically for \( \overline{\mu_{ij}^{n+1,m}}  \)  and \( (\overline{\phi_{ij}^{n+1,m}})^{\alpha} \). This was not done in the original paper as the there required System of linear equations was solved numerically. The relaxation simplifies the it to one dimension, and enable s analytical solutions:
+\begin{align*}
+\varepsilon^2(\phi_{ij}^{n+1,m})^{\alpha} +2 (\phi_{ij}^{n+1,m})^{a}   &= \varepsilon^{\alpha} - (\overline{\mu_{ij}^{n+1,m}})^{\alpha} - \Psi
+\end{align*}
+\begin{align*}
+ (\overline{\phi_{ij}^{n+1,m}})^{a} &= \frac{\varepsilon^2 c_{ij}^{a} - \frac{\text{bsum}}{h^2 \text{gsum}}}{\Delta t^{-1} + \varepsilon^2 + 2 }
+\end{align*}
+
 ** Elliptical PDE:
 on order to solve the relaxed CH Equation the following PDE as to be solved in Each additional time step:
 or in terms of the characteristic function:
 \begin{align*}
 - \nabla \cdot  (G \nabla c^\alpha) + \alpha c^\alpha  = \alpha \phi ^\alpha
 \end{align*}
-In  a similar manner to the first solver this PDE is solved with a finite difference scheme using the same discretisations as bevore:
+Similarly to the first solver this PDE is solved with a finite difference scheme using the same discretisations as bevore:
 *** Discretization
 the Discretization of the PDE expands the differential opperators in the same way
 \begin{align*}
@@ -262,7 +277,7 @@ proposed simple solver:
 Let \( F, dF \) be:
 \begin{align*}
 F(x) &= - \frac{1}{h^2}(\\
- & G_{i+\frac{1}{2}j} c_{i+1j}^\alpha  +G_{i-\frac{1}{2}j} c_{i-1j}^\alpha \\
+ & G_{i+\frac{1}{2}j} c_{i+1j}^\alpha +G_{i-\frac{1}{2}j} c_{i-1j}^\alpha \\
  +&G_{ij+\frac{1}{2}} c_{ij+1}^\alpha  + G_{ij-\frac{1}{2}}c_{ij-1}^\alpha) \\
 +& \frac{1}{h^2} (G_{i+\frac{1}{2}j} +G_{i-\frac{1}{2}j}+ G_{ij+\frac{1}{2}}+  G_{ij-\frac{1}{2}}) x^\alpha \\
 +& \alpha x^\alpha  - \alpha \phi_{ij}^\alpha
@@ -276,6 +291,5 @@ dF(x) &= -  \cdot (G_{i+\frac{1}{2}j} +G_{i-\frac{1}{2}j}+ G_{ij+\frac{1}{2}}+  
 
 solve equation for \( c_{ij}^\alpha  \) and then iteratively update the entire phasefield using the already updated values:
 * References
-\printbibliography
-
+#+latex: \printbibliograpy
 #  LocalWords:  Discretization

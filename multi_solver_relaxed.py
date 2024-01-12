@@ -178,62 +178,28 @@ def SMOOTH_relaxed_njit(
     v: int,
     alpha: float,
 ) -> Tuple[NDArray[np.float64], NDArray[np.float64]]:
-    maxiter = 10000
-    tol = 1.48e-8
     for k in range(v):
         for i in range(1, len_small + 1):
             for j in range(1, width_small + 1):
-                x = phase_small[i, j]
-                y = 0
-                # implement newton iteration
-                for iter in range(maxiter):
-                    if iter == maxiter - 1 or math.isnan(x):
-                        print("Iter:")
-                        print(iter)
-                        print("xval:")
-                        print(x)
-                        raise Warning("solver might not converge")
-                    y = (
-                        x * dt**-1
-                        - xi[i, j]
-                        - h**-2
-                        * (
-                            __G_h(i + 0.5, j, len_small, width_small)
-                            * mu_small[i + 1, j]
-                            + __G_h(i - 0.5, j, len_small, width_small)
-                            * mu_small[i - 1, j]
-                            + __G_h(i, j + 0.5, len_small, width_small)
-                            * mu_small[i, j + 1]
-                            + __G_h(i, j - 0.5, len_small, width_small)
-                            * mu_small[i, j - 1]
-                        )
-                        * (
-                            __G_h(i + 0.5, j, len_small, width_small)
-                            + __G_h(i - 0.5, j, len_small, width_small)
-                            + __G_h(i, j + 0.5, len_small, width_small)
-                            + __G_h(i, j - 0.5, len_small, width_small)
-                        )
-                        ** -1
-                    )
-                    F = (
-                        epsilon**2 * x**alpha
-                        + 2 * x
-                        - epsilon**2 * c[i, j]
-                        + y
-                        + psi[i, j]
-                    )
+                gsum = (
+                    __G_h(i + 0.5, j, len_small, width_small)
+                    + __G_h(i - 0.5, j, len_small, width_small)
+                    + __G_h(i, j + 0.5, len_small, width_small)
+                    + __G_h(i, j - 0.5, len_small, width_small)
+                )
+                bsum = (
+                    __G_h(i + 0.5, j, len_small, width_small) * mu_small[i + 1, j]
+                    + __G_h(i - 0.5, j, len_small, width_small) * mu_small[i - 1, j]
+                    + __G_h(i, j + 0.5, len_small, width_small) * mu_small[i, j + 1]
+                    + __G_h(i, j - 0.5, len_small, width_small) * mu_small[i, j - 1]
+                )
+                # TODO missing xi and psi in formula
+                phase = (epsilon**2 * c[i, j] - h**-2 * bsum * 1 / gsum) / (
+                    dt**-1 + epsilon**2 + 2
+                )
+                y = phase / dt - h**-2 * bsum / gsum - xi[i, j]
 
-                    dF = alpha * epsilon**2 * x ** (alpha - 1) + 2 + dt**-1
-                    if dF == 0:
-                        raise RuntimeError("newton solver failed in SMOOTH: dF was 0")
-                    step = F / dF
-                    x1 = x - step
-                    if abs(x - x1) < tol:
-                        break
-                    x = x1
-
-                root = x
-                phase_small[i, j] = root
+                phase_small[i, j] = phase
                 mu_small[i, j] = y
 
     return (phase_small, mu_small)
@@ -585,7 +551,7 @@ class CH_2D_Multigrid_Solver_relaxed:
         )
 
     def solve_elyps(self, n: int) -> None:
-        self.c = elyps_solver(
+        self.c = alternative_el_solver(
             self.c,
             self.phase_small,
             self.len_small,
