@@ -11,7 +11,7 @@
 /images/7_square/
 *.blg
 <<<<<<< HEAD
-/images/9_5_square.gif
+/images/*.gif
 =======
 *.png
 testing/images
