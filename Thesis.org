@@ -4,7 +4,6 @@
 #+startup: latexpreview
 
 
-
 * Cahn Hillard Equation Overview
 Partial Differential Equation (PDE) solving the state of a 2 Phase Fluid[cite:@Wu_2022]. The form of the Cahn Hillard Equation used for the remainder of this thesis is:
 \begin{align}
