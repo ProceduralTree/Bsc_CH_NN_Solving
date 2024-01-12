@@ -21,3 +21,5 @@ testdata_*.png
 **/*.png
 /org-tex-EZ6ey1.aux
 >>>>>>> origin/main
+/data/experiment_1e-03_1e-02/
+/data/experiment_*/
