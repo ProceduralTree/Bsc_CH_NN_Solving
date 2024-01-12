@@ -247,14 +247,13 @@ And the derivative for the iteration is
 \frac{d}{dx} y  &= \frac{1}{\Delta t}
 \end{align*}
 **** Proposal2
-solve analytically for \( \overline{\mu_{ij}^{n+1,m}}  \)  and \( (\overline{\phi_{ij}^{n+1,m}})^{\alpha} \). This was not done in the original paper as the there required System of linear equations was solved numerically. The relaxation simplifies the it to one dimension, and enable s analytical solutions:
+solve analytically for \( \overline{\mu_{ij}^{n+1,m}}  \)  and \( (\overline{\phi_{ij}^{n+1,m}})^{\alpha} \). This was not done in the original paper as the there required System of linear equations was solved numerically. The relaxation simplifies the it to one dimension, and enables analytical solutions:
 \begin{align*}
-\varepsilon^2(\phi_{ij}^{n+1,m})^{\alpha} +2 (\phi_{ij}^{n+1,m})^{a}   &= \varepsilon^{\alpha} - (\overline{\mu_{ij}^{n+1,m}})^{\alpha} - \Psi
+\varepsilon^2(\phi_{ij}^{n+1,m})^{\alpha} +2 (\phi_{ij}^{n+1,m})^{a}   &= \varepsilon^2 - (\overline{\mu_{ij}^{n+1,m}})^{\alpha} - \psi_{ij}
 \end{align*}
 \begin{align*}
- (\overline{\phi_{ij}^{n+1,m}})^{a} &= \frac{\varepsilon^2 c_{ij}^{a} - \frac{\text{bsum}}{h^2 \text{gsum}}}{\Delta t^{-1} + \varepsilon^2 + 2 }
+ (\overline{\phi_{ij}^{n+1,m}})^{a} &= \frac{\varepsilon^2 c_{ij}^{a} + \xi_{ij} - \frac{\text{bsum}}{h^2 \text{gsum}}}{\Delta t^{-1} + \varepsilon^2 + 2 }
 \end{align*}
-
 ** Elliptical PDE:
 on order to solve the relaxed CH Equation the following PDE as to be solved in Each additional time step:
 or in terms of the characteristic function:

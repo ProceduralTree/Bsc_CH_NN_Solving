@@ -194,10 +194,25 @@ def SMOOTH_relaxed_njit(
                     + __G_h(i, j - 0.5, len_small, width_small) * mu_small[i, j - 1]
                 )
                 # TODO missing xi and psi in formula
-                phase = (epsilon**2 * c[i, j] - h**-2 * bsum * 1 / gsum) / (
-                    dt**-1 + epsilon**2 + 2
-                )
+                phase = (
+                    epsilon**2 * c[i, j]
+                    + xi[i, j]
+                    - psi[i, j]
+                    - h**-2 * bsum * 1 / gsum
+                ) / (dt**-1 + epsilon**2 + 2)
+
                 y = phase / dt - h**-2 * bsum / gsum - xi[i, j]
+                if abs(phase) > 1e100:
+                    print(f"Iteration: ({i} , {j})")
+                    print("Phase:")
+                    print(phase)
+                    print("BSUM:")
+                    print(bsum)
+                    print("gsum:")
+                    print(gsum)
+                    print("y:")
+                    print(y)
+                    raise Warning("NaN incomming")
 
                 phase_small[i, j] = phase
                 mu_small[i, j] = y
