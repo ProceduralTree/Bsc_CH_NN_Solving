@@ -2,7 +2,6 @@
 
 * Input testing
 using epsilon from paper:
-(m * h) / (2 * np.sqrt(2) * np.arctan(0.9))
 \begin{align*}
 \varepsilon &=\frac{mh}{2 \sqrt{2} \tan^{-1}{0.9}}
 \end{align*}
@@ -11,44 +10,57 @@ using epsilon from paper:
 #+name: inputs
 |   dt |   m |    h |      epsilon |
 |------+-----+------+--------------|
-| 1e-3 | 100 | 1e-3 | 8.4205016e-4 |
-#+TBLFM: @2$4=(@2$2 * @2$3)/( 2  * sqrt(2) * arctan(0.9) )
+| 1e-3 |  60 | 1e-3 | 5.0523010e-4 |
+| 1e-2 | 300 | 1e-2 |  0.025261505 |
+| 1e-1 |   3 | 1e-1 | 2.5261505e-3 |
+#+TBLFM: @2$4..@>$4=($2 * $3)/( 2  * sqrt(2) * arctan(0.9) )
 
 
-#+begin_src python :var testinputs=inputs :tangle testing/test.py :results file :file testing/images/testdata.gif
+#+begin_src python :var testinputs=inputs :tangle testing/test.py :results output :async :session python
 import numpy as np
 from multi_solver import CH_2D_Multigrid_Solver
 import testUtils as tu
-from plot_data import plot
 import os
-path = "/home/proceduraltree/Projects/Bsc_CH_NN_Solving/testing"
-testinputs = testinputs[0]
+path = "/home/jon/Projects/Bsc_CH_NN_Solving/testing"
+testinputs = testinputs[1]
 testphase = tu.k_spheres_phase(10, 4)
 testsolver = CH_2D_Multigrid_Solver(
     tu.wprime, testphase, testinputs[0], testinputs[2], testinputs[3]
 )
 phases = []
 mus = []
-for i in range(10):
+for i in range(40):
     testsolver.solve(1, 10)
     phases += [testsolver.phase_small]
     mus += [testsolver.mu_small]
 
 np.savez(f"{path}/data/testdata", phase=phases , mu=mus )
+#+end_src
 
-plot(f"{path}", "data", "images")
-return "testing/images/testdata.gif"
+#+RESULTS:
+
+#+begin_src python :tangle testing/test.py :results file :file testing/images/testdata.gif
+import os
+from plot_data import plot
+path = "/home/jon/Projects/Bsc_CH_NN_Solving/testing"
+
+plot(path, "data", "images")
 #+end_src
 
 #+RESULTS:
 [[file:testing/images/testdata.gif]]
 
+
 #+begin_src python
 import os
-path = "/home/proceduraltree/Projects/Bsc_CH_NN_Solving/testing"
+path = "/home/jon/Projects/Bsc_CH_NN_Solving/testing"
 
+savedir = "images"
 d = "testdata"
 os.system(
     f"convert -layers OptimizePlus -delay 1x24 -quality 99 {path}/{savedir}/{d}/*.png -loop 0 {path}/{savedir}/{d}.gif"
 )
 #+end_src
+
+#+RESULTS:
+: None
