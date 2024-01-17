@@ -12,7 +12,7 @@ from numpy.typing import NDArray
 import numba as nb
 
 from typing import Tuple, NamedTuple
-from multi_solver import Interpolate, Restrict, __G_h
+from multi_solver import Interpolate, Restrict, __G_h, discrete_G_weigted_neigbour_sum
 
 
 @njit
@@ -181,35 +181,37 @@ def SMOOTH_relaxed_njit(
     for k in range(v):
         for i in range(1, len_small + 1):
             for j in range(1, width_small + 1):
-                gsum = (
+                neighbours_inside = (
                     __G_h(i + 0.5, j, len_small, width_small)
                     + __G_h(i - 0.5, j, len_small, width_small)
                     + __G_h(i, j + 0.5, len_small, width_small)
                     + __G_h(i, j - 0.5, len_small, width_small)
                 )
-                bsum = (
-                    __G_h(i + 0.5, j, len_small, width_small) * mu_small[i + 1, j]
-                    + __G_h(i - 0.5, j, len_small, width_small) * mu_small[i - 1, j]
-                    + __G_h(i, j + 0.5, len_small, width_small) * mu_small[i, j + 1]
-                    + __G_h(i, j - 0.5, len_small, width_small) * mu_small[i, j - 1]
+                neighbour_sum_weighted = discrete_G_weigted_neigbour_sum(
+                    i, j, mu_small, __G_h, len_small, width_small
                 )
                 # TODO missing xi and psi in formula
+                # FIXME
                 phase = (
                     epsilon**2 * c[i, j]
-                    + xi[i, j]
+                    + (h**2 / neighbours_inside)
+                    * (xi[i, j] + h**-2 * neighbour_sum_weighted)
                     - psi[i, j]
-                    - h**-2 * bsum * 1 / gsum
-                ) / (dt**-1 + epsilon**2 + 2)
+                ) / (h**2 * dt**-1 * neighbours_inside**-1 + epsilon**2 + 2)
 
-                y = phase / dt - h**-2 * bsum / gsum - xi[i, j]
+                y = (
+                    (phase / dt - h**-2 * neighbour_sum_weighted - xi[i, j])
+                    / neighbours_inside
+                    * h**2
+                )
                 if abs(phase) > 1e100:
                     print(f"Iteration: ({i} , {j})")
                     print("Phase:")
                     print(phase)
                     print("BSUM:")
-                    print(bsum)
+                    print(neighbour_sum_weighted)
                     print("gsum:")
-                    print(gsum)
+                    print(neighbours_inside)
                     print("y:")
                     print(y)
                     raise Warning("NaN incomming")
@@ -579,9 +581,9 @@ class CH_2D_Multigrid_Solver_relaxed:
 
 def test_solver() -> CH_2D_Multigrid_Solver_relaxed:
     solver = CH_2D_Multigrid_Solver_relaxed(
-        tu.wprime, tu.k_spheres_phase(5, 5), 1e-3, 1e-3, 1e-3
+        tu.wprime, tu.k_spheres_phase(5, 5), 1e-3, 1e-3, 1e-2
     )
-    solver.c = solver.phase_small**solver.alpha
+    solver.c = solver.phase_small
     return solver
 
 

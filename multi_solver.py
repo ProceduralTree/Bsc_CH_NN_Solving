@@ -11,6 +11,33 @@ from typing import Tuple, NamedTuple, Any
 
 
 @njit
+def boundry_sum(i, j, len, width):
+    return (
+        __G_h(i + 0.5, j, len, width)
+        + __G_h(i - 0.5, j, len, width)
+        + __G_h(i, j + 0.5, len, width)
+        + __G_h(i, j - 0.5, len, width)
+    )
+
+    pass
+
+
+@njit
+def discrete_G_weigted_neigbour_sum(
+    i: int, j: int, arr: NDArray[np.float64], G, len: int, width: int
+):
+    """
+    discrete laplace operator weighted by boundry to ensure no flux boundry
+    """
+    return (
+        G(i + 0.5, j, len, width) * arr[i + 1, j]
+        + G(i - 0.5, j, len, width) * arr[i - 1, j]
+        + G(i, j + 0.5, len, width) * arr[i, j + 1]
+        + G(i, j - 0.5, len, width) * arr[i, j - 1]
+    )
+
+
+@njit
 def Interpolate(
     array: np.ndarray, len_large, width_large, len_small, width_small
 ) -> np.ndarray:
@@ -136,28 +163,14 @@ def SMOOTH_jit(
                 b = np.array(
                     [
                         xi[i, j]
-                        + (
-                            __G_h(i + 0.5, j, len_small, width_small)
-                            * mu_small[i + 1, j]
-                            + __G_h(i - 0.5, j, len_small, width_small)
-                            * mu_small[i - 1, j]
-                            + __G_h(i, j + 0.5, len_small, width_small)
-                            * mu_small[i, j + 1]
-                            + __G_h(i, j - 0.5, len_small, width_small)
-                            * mu_small[i, j - 1]
+                        + discrete_G_weigted_neigbour_sum(
+                            i, j, mu_small, __G_h, len_small, width_small
                         )
                         / h**2,
                         psi[i, j]
                         - (epsilon**2 / h**2)
-                        * (
-                            __G_h(i + 0.5, j, len_small, width_small)
-                            * phase_small[i + 1, j]
-                            + __G_h(i - 0.5, j, len_small, width_small)
-                            * phase_small[i - 1, j]
-                            + __G_h(i, j + 0.5, len_small, width_small)
-                            * phase_small[i, j + 1]
-                            + __G_h(i, j - 0.5, len_small, width_small)
-                            * phase_small[i, j - 1]
+                        * discrete_G_weigted_neigbour_sum(
+                            i, j, phase_small, __G_h, len_small, width_small
                         ),
                     ]
                 )

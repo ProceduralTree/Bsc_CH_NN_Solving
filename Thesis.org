@@ -224,14 +224,20 @@ SMOOTH( (\phi^{n+1,m}_{ij})^\alpha, \mu^{n + \frac{1}{2},m}_{ji}, L_h , \zeta ^n
 \end{align*}
 
 #+name: eq:discrete_relaxed_smooth
-\begin{align}
- \varepsilon ^2 (\overline{\phi} ^{n+1,m}_{ij})^\alpha + 2 \phi ^{n+1,m}_{ij} &= \varepsilon ^2 c^\alpha  -\mu^{n + \frac{1}{2},m}_{ji}  - \psi_{ij} \\
-\overline{\mu}^{n + \frac{1}{2},m}_{ji}
-&=
+\begin{align*}
+  \frac{1}{h^2}\left(G_{i+\frac{1}{2}j} + G_{i-\frac{1}{2}j} + G_{ij+\frac{1}{2}} + G_{ij-\frac{1}{2}}\right)\overline{\mu}^{n + \frac{1}{2},m}_{ji} &=
   \frac{(\phi ^{n+1,m}_{ij})^\alpha}{\Delta t} - \zeta^n_{ij} \\
-&- \frac{1}{h^2}\left(G_{i+\frac{1}{2}j} \mu^{n + \frac{1}{2},m}_{i+1j} +  G_{i-1j} \mu^{n + \frac{1}{2},m}_{i-1j} + G_{ij+1}  \mu^{n + \frac{1}{2},m}_{ij+1} + G_{ij-1} \mu^{n + \frac{1}{2},m}_{ij-1} \right) \\
-&\cdot  \left(G_{i+1j} + G_{i-1j} + G_{ij+1} + G_{ij-1}\right)^{-1}
-\end{align}
+&- \frac{1}{h^2} (\\
+&G_{i+\frac{1}{2}j} \mu^{n + \frac{1}{2},m}_{i+1j}\\
+&+  G_{i-\frac{1}{2}j} \mu^{n + \frac{1}{2},m}_{i-1j} \\
+&+ G_{ij+\frac{1}{2}}  \mu^{n + \frac{1}{2},m}_{ij+1} \\
+&+ G_{ij-\frac{1}{2}} \mu^{n + \frac{1}{2},m}_{ij-1} \\
+& ) \\
+\end{align*}
+
+\begin{align*}
+ \varepsilon ^2 (\overline{\phi} ^{n+1,m}_{ij})^\alpha + 2 \phi ^{n+1,m}_{ij} &= \varepsilon ^2 c^\alpha  -\mu^{n + \frac{1}{2},m}_{ji}  - \psi_{ij}
+\end{align*}
 **** Proposal1
 Since the resulting system no longer is linear, (albeit simpler in Dimension), we propose a newton method to solve second equation (in conjunction with the first one) hopefully solving this converges faster than the original multiple SMOOTH Iterations.
  The iteration solves for \( (\phi ^{n+1,m}_{ij})^\alpha = x \) as free variable. Therefore, it follows for \( F(x) \)
@@ -248,12 +254,20 @@ And the derivative for the iteration is
 \end{align*}
 **** Proposal2
 solve analytically for \( \overline{\mu_{ij}^{n+1,m}}  \)  and \( (\overline{\phi_{ij}^{n+1,m}})^{\alpha} \). This was not done in the original paper as the there required System of linear equations was solved numerically. The relaxation simplifies the it to one dimension, and enables analytical solutions:
+
+Let \( \Sigma_G \mu_{ij} = G_{i+\frac{1}{2}j} \mu^{n + \frac{1}{2},m}_{i+1j} +  G_{i-\frac{1}{2}j} \mu^{n + \frac{1}{2},m}_{i-1j} + G_{ij+\frac{1}{2}}  \mu^{n + \frac{1}{2},m}_{ij+1} + G_{ij-\frac{1}{2}} \mu^{n + \frac{1}{2},m}_{ij-1} \) and \( \Sigma_G = G_{i+\frac{1}{2}j} + G_{i-\frac{1}{2}j} + G_{ij+\frac{1}{2}} + G_{ij-\frac{1}{2}} \). Then [[eq:discrete_relaxed_smooth]] solves as
 \begin{align*}
-\varepsilon^2(\phi_{ij}^{n+1,m})^{\alpha} +2 (\phi_{ij}^{n+1,m})^{a}   &= \varepsilon^2 - (\overline{\mu_{ij}^{n+1,m}})^{\alpha} - \psi_{ij}
+\varepsilon^2(\phi^\alpha) + 2\phi^\alpha &= \varepsilon^2 c^\alpha - \frac{h^2}{\Sigma_G} (\frac{\phi^\alpha}{\Delta t} - \zeta^n_{ij} - \frac{1}{h^2} \Sigma_G \mu_{ij}) - \psi_{ij}
 \end{align*}
+\( \implies \)
 \begin{align*}
- (\overline{\phi_{ij}^{n+1,m}})^{a} &= \frac{\varepsilon^2 c_{ij}^{a} + \xi_{ij} - \frac{\text{bsum}}{h^2 \text{gsum}}}{\Delta t^{-1} + \varepsilon^2 + 2 }
+\varepsilon^2(\phi^\alpha) + 2\phi^\alpha + \frac{h^2}{\Sigma_G}\frac{\phi^\alpha}{\Delta t} &= \varepsilon^2 c^\alpha - \frac{h^2}{\Sigma_G} (- \zeta^n_{ij} - \frac{1}{h^2} \Sigma_G \mu_{ij}) - \psi_{ij}
 \end{align*}
+\( \implies \)
+\begin{align*}
+(\varepsilon^2 + 2 + \frac{h^2}{\Sigma_G \Delta t}) \phi^\alpha = \varepsilon^2 c^\alpha - \frac{h^2}{\Sigma_G}(- \zeta^n_{ij} - \frac{\Sigma_G \mu_{ij}}{h^2} ) -\psi_{ij}
+\end{align*}
+
 ** Elliptical PDE:
 on order to solve the relaxed CH Equation the following PDE as to be solved in Each additional time step:
 or in terms of the characteristic function:
