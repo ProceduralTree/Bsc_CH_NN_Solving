@@ -1,6 +1,6 @@
 #+title: Testing
 
-* Input testing
+*  Input testing
 using epsilon from paper:
 \begin{align*}
 \varepsilon &=\frac{mh}{2 \sqrt{2} \tan^{-1}{0.9}}
@@ -13,6 +13,7 @@ using epsilon from paper:
 | 1e-3 |  60 | 1e-3 | 5.0523010e-4 |
 | 1e-2 | 300 | 1e-2 |  0.025261505 |
 | 1e-1 |   3 | 1e-1 | 2.5261505e-3 |
+| 1e-3 |  30 | 1e-2 | 2.5261505e-3 |
 #+TBLFM: @2$4..@>$4=($2 * $3)/( 2  * sqrt(2) * arctan(0.9) )
 
 
@@ -38,6 +39,8 @@ np.savez(f"{path}/data/testdata", phase=phases , mu=mus )
 #+end_src
 
 #+RESULTS:
+: /home/jon/.cache/pypoetry/virtualenvs/cahn-hillard-utils-LAH73LAV-py3.10/lib/python3.10/site-packages/numba/core/dispatcher.py:289: UserWarning: Numba extension module 'numba_scipy' failed to load due to 'ValueError(No function '__pyx_fuse_0pdtr' found in __pyx_capi__ of 'scipy.special.cython_special')'.
+:   entrypoints.init_all()
 
 #+begin_src python :tangle testing/test.py :results file :file testing/images/testdata.gif
 import os
