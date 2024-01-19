@@ -1,7 +1,6 @@
 #+title: Bachelor Thesis
 #+bibliography: "~/org/resources/bibliography/refs.bib"
 #+LATEX_HEADER: \usepackage[natbib=true]{biblatex} \DeclareFieldFormat{apacase}{#1}
-#+LATEX_HEADER: \addbibresource{~/org/resources/bibliography/refs.bib}
 #+Options: tex:dvisvgm
 
 
@@ -304,5 +303,5 @@ dF(x) &= -  \cdot (G_{i+\frac{1}{2}j} +G_{i-\frac{1}{2}j}+ G_{ij+\frac{1}{2}}+  
 
 solve equation for \( c_{ij}^\alpha  \) and then iteratively update the entire phasefield using the already updated values:
 * References
-#+latex: \printbibliograpy
+#+latex: \printbibliography
 #  LocalWords:  Discretization
