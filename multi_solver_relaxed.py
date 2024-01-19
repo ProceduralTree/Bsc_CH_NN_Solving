@@ -39,7 +39,7 @@ def alternative_el_solver(
                     + __G_h(i, j + 0.5, len, width)
                     + __G_h(i, j - 0.5, len, width)
                 )
-                x = c[i, j] + 0.01
+                x = c[i, j]
                 for iter in range(maxiter):
                     if iter == maxiter - 2:
                         print("Iter:")
@@ -59,15 +59,13 @@ def alternative_el_solver(
                         )
                         + h**-2 * bordernumber * x
                         + alpha * x
-                        - alpha * phase[i, j] ** alpha
+                        - alpha * phase[i, j]
                     )
 
                     dF = -1 * alpha + h**-2 * bordernumber
 
                     if dF == 0:
-                        raise RuntimeError(
-                            "ERROR newton iteration in elyps solver did not converge, dF was 0"
-                        )
+                        continue
 
                     step = F / dF
                     x = x - step
@@ -193,11 +191,15 @@ def SMOOTH_relaxed_njit(
                 # TODO missing xi and psi in formula
                 # FIXME
                 phase = (
-                    epsilon**2 * c[i, j]
+                    epsilon**2 * alpha * c[i, j]
                     + (h**2 / neighbours_inside)
                     * (xi[i, j] + h**-2 * neighbour_sum_weighted)
                     - psi[i, j]
-                ) / (h**2 * dt**-1 * neighbours_inside**-1 + epsilon**2 + 2)
+                ) / (
+                    h**2 * dt**-1 * neighbours_inside**-1
+                    + epsilon**2 * alpha
+                    + 2
+                )
 
                 y = (
                     (phase / dt - h**-2 * neighbour_sum_weighted - xi[i, j])
@@ -583,6 +585,7 @@ def test_solver() -> CH_2D_Multigrid_Solver_relaxed:
     solver = CH_2D_Multigrid_Solver_relaxed(
         tu.wprime, tu.k_spheres_phase(5, 5), 1e-3, 1e-3, 1e-2
     )
+    solver.alpha = 10001
     solver.c = solver.phase_small
     return solver
 
