@@ -12,7 +12,13 @@ from numpy.typing import NDArray
 import numba as nb
 
 from typing import Tuple, NamedTuple
-from multi_solver import Interpolate, Restrict, __G_h, discrete_G_weigted_neigbour_sum
+from multi_solver import (
+    Interpolate,
+    Restrict,
+    __G_h,
+    discrete_G_weigted_neigbour_sum,
+    neighbours_in_domain,
+)
 
 
 @njit
@@ -29,16 +35,11 @@ def alternative_el_solver(
     solves elyptical equation for \(x^\alpha\)
     """
     maxiter = 10000
-    tol = 1.48e-8
+    tol = 1.48e-4
     for k in range(n):
         for i in range(1, len + 1):
             for j in range(1, width + 1):
-                bordernumber = (
-                    __G_h(i + 0.5, j, len, width)
-                    + __G_h(i - 0.5, j, len, width)
-                    + __G_h(i, j + 0.5, len, width)
-                    + __G_h(i, j - 0.5, len, width)
-                )
+                bordernumber = neighbours_in_domain(i, j, len, width)
                 x = c[i, j]
                 for iter in range(maxiter):
                     if iter == maxiter - 2:
@@ -46,23 +47,19 @@ def alternative_el_solver(
                         print(iter)
                         print("c:")
                         print(x)
+                        continue
 
                         raise Warning("solver might not converge")
                     F = (
                         -1
                         * h**-2
-                        * (
-                            __G_h(i + 0.5, j, len, width) * c[i + 1, j]
-                            + __G_h(i - 0.5, j, len, width) * c[i - 1, j]
-                            + __G_h(i, j + 0.5, len, width) * c[i, j + 1]
-                            + __G_h(i, j - 0.5, len, width) * c[i, j - 1]
-                        )
+                        * discrete_G_weigted_neigbour_sum(i, j, c, __G_h, len, width)
                         + h**-2 * bordernumber * x
                         + alpha * x
                         - alpha * phase[i, j]
                     )
 
-                    dF = -1 * alpha + h**-2 * bordernumber
+                    dF = alpha + h**-2 * bordernumber
 
                     if dF == 0:
                         continue
@@ -71,7 +68,7 @@ def alternative_el_solver(
                     x = x - step
                     if abs(step) < tol:
                         break
-                    if abs(step) > 1e16:
+                    if abs(step) > 1e100:
                         print("Step:")
                         print(step)
                         print("Iter:")
@@ -581,11 +578,9 @@ class CH_2D_Multigrid_Solver_relaxed:
         )
 
 
-def test_solver() -> CH_2D_Multigrid_Solver_relaxed:
-    solver = CH_2D_Multigrid_Solver_relaxed(
-        tu.wprime, tu.k_spheres_phase(5, 5), 1e-3, 1e-3, 1e-2
-    )
-    solver.alpha = 10001
+def test_solver(phase: NDArray[float]) -> CH_2D_Multigrid_Solver_relaxed:
+    solver = CH_2D_Multigrid_Solver_relaxed(tu.wprime, phase, 1e-3, 1e-3, 1e-2)
+    solver.alpha = 1e5 + 1
     solver.c = solver.phase_small
     return solver
 
