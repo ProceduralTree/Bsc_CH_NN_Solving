@@ -1,17 +1,14 @@
 #+title: Bachelor Thesis
-#+bibliography: "~/org/resources/bibliography/refs.bib"
-#+LATEX_HEADER: \usepackage[natbib=true]{biblatex} \DeclareFieldFormat{apacase}{#1}
-#+Options: tex:dvisvgm
-
+#+BIBLIOGRAPHY: ~/org/resources/bibliography/refs.bib
 
 * Cahn Hillard Equation Overview
 Partial Differential Equation (PDE) solving the state of a 2 Phase Fluid[cite:@Wu_2022]. The form of the Cahn Hillard Equation used for the remainder of this thesis is:
+where \( \phi\) is the so-called phase field. Demarking the different states of the fluids through an Interval \(I=[-1,1] \) and where \(\partial I = \{-1,1\} \) represents full state of one fluid. \(\varepsilon > 0 \) is  a positive constant
 #+name: eq:CH
 \begin{align}
 \phi _t(x,t) &= \Delta  \mu \\
 \mu &= - \varepsilon^2 \Delta \phi   + W'(\phi)
 \end{align}
-where \( \phi\) is the so-called phase field. Demarking the different states of the fluids through an Interval \(I=[-1,1] \) and where \(\partial I = \{-1,1\} \) represents full state of one fluid. \(\varepsilon > 0 \) is  a positive constant
 # describing the width of the phase transition
 , and \(\mu\) is the chemical potential[cite:@Wu_2022]. While the Cahn Hillard exist in a more general form taking the fluid's mobility \(M(\Phi) \) into account, we will assume \(M(\Phi) = 1 \), simplifying the CH-Equations used in [cite:@Wu_2022] [cite:@SHIN20117441] to what is stated above.
 
@@ -145,17 +142,18 @@ sns.set_theme()
 #+RESULTS:
 : None
 
-#+name: dots
+#+name: fig:dots
 #+header: :file images/phase.png
 #+begin_src python :results graphics file output :eval never-export :session
 tu.SEED = 98
-test_phase = tu.k_spheres_phase(5,6)
+test_phase = tu.k_spheres_phase(5,20 , size=128)
 plt.figure()
 sns.heatmap(test_phase)
 #+end_src
 
-#+RESULTS: dots
+#+RESULTS: fig:dots
 [[file:images/phase.png]]
+
 
  #+name: points
 #+header: :file images/phase2.png
@@ -213,7 +211,7 @@ L
 &=
 \begin{pmatrix}
 \frac{(\phi^{n+1,m}_{ij})^\alpha}{\Delta t} - \nabla _d \cdot (G_{ji} \nabla _d \mu^{n + \frac{1}{2},m}_{ji}) \\
-\varepsilon ^2 (c^\alpha - (\phi^{n+1,m}_{ij})^\alpha) - 2(\phi ^{n+1,m}_{ij})^\alpha -\mu^{n + \frac{1}{2},m}_{ji}
+\varepsilon ^2 \alpha (c^\alpha - (\phi^{n+1,m}_{ij})^\alpha) - 2(\phi ^{n+1,m}_{ij})^\alpha -\mu^{n + \frac{1}{2},m}_{ji}
 \end{pmatrix}
 \end{align*}
 *** SMOOTH
@@ -235,7 +233,7 @@ SMOOTH( (\phi^{n+1,m}_{ij})^\alpha, \mu^{n + \frac{1}{2},m}_{ji}, L_h , \zeta ^n
 \end{align*}
 
 \begin{align*}
- \varepsilon ^2 (\overline{\phi} ^{n+1,m}_{ij})^\alpha + 2 \phi ^{n+1,m}_{ij} &= \varepsilon ^2 c^\alpha  -\mu^{n + \frac{1}{2},m}_{ji}  - \psi_{ij}
+ \varepsilon ^2 \alpha (\overline{\phi} ^{n+1,m}_{ij})^\alpha + 2 \phi ^{n+1,m}_{ij} &= \varepsilon ^2 \alpha c^\alpha  -\mu^{n + \frac{1}{2},m}_{ji}  - \psi_{ij}
 \end{align*}
 **** Proposal1
 Since the resulting system no longer is linear, (albeit simpler in Dimension), we propose a newton method to solve second equation (in conjunction with the first one) hopefully solving this converges faster than the original multiple SMOOTH Iterations.
@@ -256,15 +254,15 @@ solve analytically for \( \overline{\mu_{ij}^{n+1,m}}  \)  and \( (\overline{\ph
 
 Let \( \Sigma_G \mu_{ij} = G_{i+\frac{1}{2}j} \mu^{n + \frac{1}{2},m}_{i+1j} +  G_{i-\frac{1}{2}j} \mu^{n + \frac{1}{2},m}_{i-1j} + G_{ij+\frac{1}{2}}  \mu^{n + \frac{1}{2},m}_{ij+1} + G_{ij-\frac{1}{2}} \mu^{n + \frac{1}{2},m}_{ij-1} \) and \( \Sigma_G = G_{i+\frac{1}{2}j} + G_{i-\frac{1}{2}j} + G_{ij+\frac{1}{2}} + G_{ij-\frac{1}{2}} \). Then [[eq:discrete_relaxed_smooth]] solves as
 \begin{align*}
-\varepsilon^2(\phi^\alpha) + 2\phi^\alpha &= \varepsilon^2 c^\alpha - \frac{h^2}{\Sigma_G} (\frac{\phi^\alpha}{\Delta t} - \zeta^n_{ij} - \frac{1}{h^2} \Sigma_G \mu_{ij}) - \psi_{ij}
+\varepsilon^2 \alpha(\phi^\alpha) + 2\phi^\alpha &= \varepsilon^2 \alpha c^\alpha - \frac{h^2}{\Sigma_G} (\frac{\phi^\alpha}{\Delta t} - \zeta^n_{ij} - \frac{1}{h^2} \Sigma_G \mu_{ij}) - \psi_{ij}
 \end{align*}
 \( \implies \)
 \begin{align*}
-\varepsilon^2(\phi^\alpha) + 2\phi^\alpha + \frac{h^2}{\Sigma_G}\frac{\phi^\alpha}{\Delta t} &= \varepsilon^2 c^\alpha - \frac{h^2}{\Sigma_G} (- \zeta^n_{ij} - \frac{1}{h^2} \Sigma_G \mu_{ij}) - \psi_{ij}
+\varepsilon^2\alpha (\phi^\alpha) + 2\phi^\alpha + \frac{h^2}{\Sigma_G}\frac{\phi^\alpha}{\Delta t} &= \varepsilon^2 \alpha c^\alpha - \frac{h^2}{\Sigma_G} (- \zeta^n_{ij} - \frac{1}{h^2} \Sigma_G \mu_{ij}) - \psi_{ij}
 \end{align*}
 \( \implies \)
 \begin{align*}
-(\varepsilon^2 + 2 + \frac{h^2}{\Sigma_G \Delta t}) \phi^\alpha = \varepsilon^2 c^\alpha - \frac{h^2}{\Sigma_G}(- \zeta^n_{ij} - \frac{\Sigma_G \mu_{ij}}{h^2} ) -\psi_{ij}
+(\varepsilon^2 \alpha + 2 + \frac{h^2}{\Sigma_G \Delta t}) \phi^\alpha = \varepsilon^2 \alpha c^\alpha - \frac{h^2}{\Sigma_G}(- \zeta^n_{ij} - \frac{\Sigma_G \mu_{ij}}{h^2} ) -\psi_{ij}
 \end{align*}
 
 ** Elliptical PDE:
@@ -273,35 +271,99 @@ or in terms of the characteristic function:
 \begin{align*}
 - \nabla \cdot  (G \nabla c^\alpha) + \alpha c^\alpha  = \alpha \phi ^\alpha
 \end{align*}
-Similarly to the first solver this PDE is solved with a finite difference scheme using the same discretisations as bevore:
+Similarly to the first solver this PDE is solved with a finite difference scheme using the same discretisations as before:
 *** Discretization
-the Discretization of the PDE expands the differential opperators in the same way
+the Discretization of the PDE expands the differential opperators in the same way and proposes an equivalent scheme for solving.
 \begin{align*}
-- \nabla_d \cdot  (G_{ij} \nabla_d c_{ij}^\alpha) + \alpha  c_{ij}^\alpha &= \alpha \phi_{ij}^\alpha \\
+- \nabla_d \cdot  (G_{ij} \nabla_d c_{ij}^\alpha) + \alpha  c_{ij}^\alpha &= \alpha \phi_{ij}^\alpha
+\end{align*}
+\( \implies \)
+\begin{align*}
 - (\frac{1}{h}(G_{i+\frac{1}{2}j} \nabla c^\alpha_{i+\frac{1}{2}j} + G_{ij+\frac{1}{2}} \nabla c^\alpha_{ij+\frac{1}{2}}) &  \\
-- (G_{i-\frac{1}{2}j} \nabla c^\alpha_{i-\frac{1}{2}j} + G_{ij-\frac{1}{2}} \nabla c^\alpha_{ij-\frac{1}{2}})) + \alpha  c_{ij}^\alpha   &= \alpha  \phi_{ij}^\alpha \\
+- (G_{i-\frac{1}{2}j} \nabla c^\alpha_{i-\frac{1}{2}j} + G_{ij-\frac{1}{2}} \nabla c^\alpha_{ij-\frac{1}{2}})) + \alpha  c_{ij}^\alpha   &= \alpha  \phi_{ij}^\alpha
+\end{align*}
+\( \implies \)
+\begin{align*}
 - \frac{1}{h^2} ( G_{i+\frac{1}{2}j}(c_{i+1j}^\alpha - c_{ij}^\alpha) & \\
 +G_{ij+\frac{1}{2}}(c_{ij+1}^\alpha - c_{ij}^\alpha) & \\
 +G_{i-\frac{1}{2}j}(c_{i-1j}^\alpha - c_{ij}^\alpha)& \\
 +G_{ij-\frac{1}{2}}(c_{ij-1}^\alpha - c_{ij}^\alpha)) + \alpha  c_{ij}^\alpha &=\alpha  \phi_{ij}^\alpha
 \end{align*}
-proposed simple solver:
+
+
+As before we abbreviate \(  \Sigma_G c^\alpha_{ij} = G_{i+\frac{1}{2}j} c^\alpha_{i+1j} +  G_{i-\frac{1}{2}j} c^\alpha_{i-1j} + G_{ij+\frac{1}{2}}  c^\alpha_{ij+1} + G_{ij-\frac{1}{2}} c^\alpha_{ij-1}  \) and \(  \Sigma_G = G_{i+\frac{1}{2}j} + G_{i-\frac{1}{2}j} + G_{ij+\frac{1}{2}} + G_{ij-\frac{1}{2}}  \). Then the discrete elyptical PDE can be stated as:
+#+name: eq:discrete_elyps
+\begin{align}
+-\frac{ \Sigma_G c^\alpha_{ij}}{h^2} + \frac{\Sigma_G}{h^2} c^\alpha_{ij} + \alpha c^\alpha_{ij} &= \alpha\phi^\alpha_{ij}
+\end{align}
+
+And then we propose a simple newton Iteration to solve  [[eq:discrete_elyps]]  for \( x = c^\alpha_{ij} \):
 Let \( F, dF \) be:
 \begin{align*}
-F(x) &= - \frac{1}{h^2}(\\
- & G_{i+\frac{1}{2}j} c_{i+1j}^\alpha +G_{i-\frac{1}{2}j} c_{i-1j}^\alpha \\
- +&G_{ij+\frac{1}{2}} c_{ij+1}^\alpha  + G_{ij-\frac{1}{2}}c_{ij-1}^\alpha) \\
-+& \frac{1}{h^2} (G_{i+\frac{1}{2}j} +G_{i-\frac{1}{2}j}+ G_{ij+\frac{1}{2}}+  G_{ij-\frac{1}{2}}) x^\alpha \\
-+& \alpha x^\alpha  - \alpha \phi_{ij}^\alpha
+F(x) &= - \frac{\Sigma_Gc^\alpha_{ij}}{h^2} + \frac{\Sigma_G}{h^2}  x + \alpha x  - \alpha \phi_{ij}^\alpha
 \end{align*}
 and \( dF(x) \)
 
 \begin{align*}
-dF(x) &= -  \cdot (G_{i+\frac{1}{2}j} +G_{i-\frac{1}{2}j}+ G_{ij+\frac{1}{2}}+  G_{ij-\frac{1}{2}}  ) \alpha x^{\alpha -1}  + \alpha ^2 x^{\alpha -1}
+dF(x) &= - \frac{\Sigma_G}{h^2}    + \alpha
 \end{align*}
+the implementation then is the following:
+#+begin_src python  :tangle test.py :eval never
+@njit
+def elyptical_PDE_solver(
+    c: NDArray[np.float64],
+    phase: NDArray[np.float64],
+    len: int,
+    width: int,
+    alpha: float,
+    h: float,
+    n: int,
+) -> NDArray[np.float64]:
+    """
+    solves elyptical equation
+    """
+    maxiter = 10000
+    tol = 1.48e-4
+    for k in range(n):
+        for i in range(1, len + 1):
+            for j in range(1, width + 1):
+                bordernumber = neighbours_in_domain(i, j, len, width)
+                x = c[i, j]
+                    F = (
+                        -1
+                        * h**-2
+                        * discrete_G_weigted_neigbour_sum(i, j, c, __G_h, len, width)
+                        + h**-2 * bordernumber * x
+                        + alpha * x
+                        - alpha * phase[i, j]
+                    )
 
+                    dF = alpha + h**-2 * bordernumber
 
-solve equation for \( c_{ij}^\alpha  \) and then iteratively update the entire phasefield using the already updated values:
+                    if dF == 0:
+                        continue
+
+                    step = F / dF
+                    x = x - step
+                    if abs(step) < tol:
+                        break
+                c[i, j] = x
+    return c
+#+end_src
+
+as input we use [[fig:dots]]:
+#+begin_src python :results graphics file output :eval never-export :session :file elyps.png :exports both
+from multi_solver_relaxed import CH_2D_Multigrid_Solver_relaxed , test_solver , plot
+
+t = test_solver(test_phase)
+t.solve_elyps(10)
+sns.heatmap(t.c)
+plt.plot()
+#+end_src
+
+#+RESULTS:
+[[file:elyps.png]]
+
 * References
-#+latex: \printbibliography
+#+PRINT_BIBLIOGRAPHY:
 #  LocalWords:  Discretization

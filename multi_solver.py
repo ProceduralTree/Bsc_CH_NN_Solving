@@ -11,7 +11,7 @@ from typing import Tuple, NamedTuple, Any
 
 
 @njit
-def boundry_sum(i, j, len, width):
+def neighbours_in_domain(i, j, len, width):
     return (
         __G_h(i + 0.5, j, len, width)
         + __G_h(i - 0.5, j, len, width)
@@ -25,7 +25,7 @@ def boundry_sum(i, j, len, width):
 @njit
 def discrete_G_weigted_neigbour_sum(
     i: int, j: int, arr: NDArray[np.float64], G, len: int, width: int
-):
+) -> float:
     """
     discrete laplace operator weighted by boundry to ensure no flux boundry
     """
