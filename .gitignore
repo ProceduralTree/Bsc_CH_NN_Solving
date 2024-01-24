@@ -24,3 +24,4 @@ testdata_*.png
 /data/experiment_1e-03_1e-02/
 /data/experiment_*/
 /org-tex-tc1M1f.aux
+**/*.png

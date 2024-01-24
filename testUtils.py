@@ -5,6 +5,7 @@ import numpy as np
 from multi_solver import CH_2D_Multigrid_Solver
 from multi_solver import SMOOTH_jit
 from numpy.random import Generator, PCG64
+from numpy.typing import NDArray
 import random
 import os
 
@@ -29,8 +30,8 @@ def square_phase() -> np.ndarray:
     return ret
 
 
-def setup_solver(test_phase) -> CH_2D_Multigrid_Solver:
-    solver = CH_2D_Multigrid_Solver(np.vectorize(wprime), test_phase, 1e-4, 1e-4, 1e-4)
+def setup_solver(test_phase: NDArray[float]) -> CH_2D_Multigrid_Solver:
+    solver = CH_2D_Multigrid_Solver(np.vectorize(wprime), test_phase, 1e-3, 1e-3, 1e-3)
     return solver
 
 

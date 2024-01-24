@@ -8,12 +8,12 @@ using epsilon from paper:
 
 
 #+name: inputs
-|   dt |  m |    h |      epsilon |
-|------+----+------+--------------|
-| 1e-3 | 60 | 1e-3 | 5.0523010e-4 |
-| 1e-2 | 30 | 1e-2 | 2.5261505e-3 |
-| 1e-1 |  3 | 1e-1 | 2.5261505e-3 |
-| 1e-3 | 30 | 1e-2 | 2.5261505e-3 |
+|   dt |   m |    h |      epsilon |
+|------+-----+------+--------------|
+| 1e-3 | 150 | 1e-3 | 1.2630752e-3 |
+| 1e-2 |  30 | 1e-2 | 2.5261505e-3 |
+| 1e-1 |   3 | 1e-1 | 2.5261505e-3 |
+| 1e-3 |  30 | 1e-2 | 2.5261505e-3 |
 #+TBLFM: @2$4..@>$4=($2 * $3)/( 2  * sqrt(2) * arctan(0.9) )
 
 #+begin_src python :tangle testing/test.py :results file graphics output :file testing/images/smooth.png :var testinputs=inputs :session test
@@ -23,12 +23,13 @@ import testUtils as tu
 import seaborn as sns
 import matplotlib.pyplot as plt
 
-testphase = tu.k_spheres_phase(10, 5, size=32)
-testinputs = testinputs[1]
+testphase = tu.k_spheres_phase(10, 15, size=128)
+testinputs = testinputs[0]
 print(testinputs)
 testsolver = CH_2D_Multigrid_Solver(
     tu.wprime, testphase, testinputs[0], testinputs[2], testinputs[3]
 )
+testsolver.set_xi_and_psi()
 testsolver.SMOOTH(10)
 sns.heatmap(testsolver.phase_small)
 #+end_src
@@ -44,7 +45,7 @@ import testUtils as tu
 import os
 path = "/home/jon/Projects/Bsc_CH_NN_Solving/testing"
 testinputs = testinputs[0]
-testphase = tu.k_spheres_phase(10, 4, size=64)
+testphase = tu.k_spheres_phase(10, 15, size=128)
 testsolver = CH_2D_Multigrid_Solver(
     tu.wprime, testphase, testinputs[0], testinputs[2], testinputs[3]
 )
@@ -59,8 +60,7 @@ np.savez(f"{path}/data/testdata", phase=phases , mu=mus )
 #+end_src
 
 #+RESULTS:
-: /home/jon/.cache/pypoetry/virtualenvs/cahn-hillard-utils-LAH73LAV-py3.10/lib/python3.10/site-packages/numba/core/dispatcher.py:289: UserWarning: Numba extension module 'numba_scipy' failed to load due to 'ValueError(No function '__pyx_fuse_0pdtr' found in __pyx_capi__ of 'scipy.special.cython_special')'.
-:   entrypoints.init_all()
+: c4d4355f-124f-4d98-a592-32047f266ad5
 
 #+begin_src python :tangle testing/test.py :results file :file testing/images/testdata.gif
 import os
