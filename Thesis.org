@@ -169,7 +169,7 @@ sns.heatmap(test_phase)
 ** Tests
 
 #+begin_src python :session :async :eval never-export :results results
-test_phase = tu.k_spheres_phase(4,7)
+test_phase = tu.k_spheres_phase(4,17, size=64)
 solver = tu.setup_solver(test_phase)
 solver.solve(4,10)
 #+end_src
@@ -356,7 +356,7 @@ as input we use [[fig:dots]]:
 from multi_solver_relaxed import CH_2D_Multigrid_Solver_relaxed , test_solver , plot
 
 t = test_solver(test_phase)
-t.solve_elyps(10)
+t.solve_elyps(100)
 sns.heatmap(t.c)
 plt.plot()
 #+end_src

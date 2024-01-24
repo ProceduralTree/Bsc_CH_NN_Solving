@@ -149,28 +149,28 @@ def SMOOTH_jit(
                     + __G_h(i, j + 0.5, len_small, width_small)
                     + __G_h(i, j - 0.5, len_small, width_small)
                 )
-                gsum = bordernumber
                 coefmatrix = np.array(
                     [
                         [1 / dt, bordernumber / h**2],
-                        [
-                            -1 * (2 + (epsilon**2 / h**2) * gsum),
-                            1,
-                        ],
+                        [-1 * (2 + (epsilon**2 / h**2) * bordernumber), 1],
                     ]
                 )
 
                 b = np.array(
                     [
-                        xi[i, j]
-                        + discrete_G_weigted_neigbour_sum(
-                            i, j, mu_small, __G_h, len_small, width_small
-                        )
-                        / h**2,
-                        psi[i, j]
-                        - (epsilon**2 / h**2)
-                        * discrete_G_weigted_neigbour_sum(
-                            i, j, phase_small, __G_h, len_small, width_small
+                        (
+                            xi[i, j]
+                            + discrete_G_weigted_neigbour_sum(
+                                i, j, mu_small, __G_h, len_small, width_small
+                            )
+                            / h**2
+                        ),
+                        (
+                            psi[i, j]
+                            - (epsilon**2 / h**2)
+                            * discrete_G_weigted_neigbour_sum(
+                                i, j, phase_small, __G_h, len_small, width_small
+                            )
                         ),
                     ]
                 )
