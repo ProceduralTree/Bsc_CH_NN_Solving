@@ -297,6 +297,7 @@ As before we abbreviate \(  \Sigma_G c^\alpha_{ij} = G_{i+\frac{1}{2}j} c^\alpha
 -\frac{ \Sigma_G c^\alpha_{ij}}{h^2} + \frac{\Sigma_G}{h^2} c^\alpha_{ij} + \alpha c^\alpha_{ij} &= \alpha\phi^\alpha_{ij}
 \end{align}
 
+**** Proposal1 Newton Solver
 And then we propose a simple newton Iteration to solve  [[eq:discrete_elyps]]  for \( x = c^\alpha_{ij} \):
 Let \( F, dF \) be:
 \begin{align*}
@@ -353,10 +354,13 @@ def elyptical_PDE_solver(
 
 as input we use [[fig:dots]]:
 #+begin_src python :results graphics file output :eval never-export :session :file elyps.png :exports both
+import testUtils as tu
+import seaborn as sns
+import matplotlib.pyplot as plt
 from multi_solver_relaxed import CH_2D_Multigrid_Solver_relaxed , test_solver , plot
-
+test_phase = tu.k_spheres_phase(15, 50, size=265)
 t = test_solver(test_phase)
-t.solve_elyps(100)
+t.solve_elyps(10000)
 sns.heatmap(t.c)
 plt.plot()
 #+end_src
@@ -364,6 +368,8 @@ plt.plot()
 #+RESULTS:
 [[file:elyps.png]]
 
+**** Proposal2 Analytical solver
+solving [[eq:discrete_elyps]] for \(c_{ij}^\alpha \) then results in.
 * References
 #+PRINT_BIBLIOGRAPHY:
 #  LocalWords:  Discretization
