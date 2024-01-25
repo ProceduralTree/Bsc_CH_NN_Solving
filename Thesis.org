@@ -1,6 +1,27 @@
 #+title: Bachelor Thesis
 #+BIBLIOGRAPHY: ~/org/resources/bibliography/refs.bib
+#+property: header-args:python :noweb strip-export
+* Utility functions
+#+name: imports
+#+begin_src python
+import seaborn as sns
+import matplotlib.pyplot as plt
 
+import numpy as np
+from numba import njit
+import testUtils as tu
+
+from numpy.typing import NDArray
+
+from typing import Tuple, NamedTuple
+from multi_solver import (
+    Interpolate,
+    Restrict,
+    __G_h,
+    discrete_G_weigted_neigbour_sum,
+    neighbours_in_domain,
+)
+#+end_src
 * Cahn Hillard Equation Overview
 Partial Differential Equation (PDE) solving the state of a 2 Phase Fluid[cite:@Wu_2022]. The form of the Cahn Hillard Equation used for the remainder of this thesis is:
 where \( \phi\) is the so-called phase field. Demarking the different states of the fluids through an Interval \(I=[-1,1] \) and where \(\partial I = \{-1,1\} \) represents full state of one fluid. \(\varepsilon > 0 \) is  a positive constant
@@ -309,7 +330,13 @@ and \( dF(x) \)
 dF(x) &= - \frac{\Sigma_G}{h^2}    + \alpha
 \end{align*}
 the implementation then is the following:
+#+name: elyptical_PDE_solver
 #+begin_src python  :tangle test.py :eval never
+from numba import njit
+from numpy.typing import NDArray
+import numpy as np
+from multi_solver import neighbours_in_domain , discrete_G_weigted_neigbour_sum , __G_h
+
 @njit
 def elyptical_PDE_solver(
     c: NDArray[np.float64],
@@ -330,10 +357,11 @@ def elyptical_PDE_solver(
             for j in range(1, width + 1):
                 bordernumber = neighbours_in_domain(i, j, len, width)
                 x = c[i, j]
+                for iter in range(maxiter):
                     F = (
                         -1
-                        * h**-2
-                        * discrete_G_weigted_neigbour_sum(i, j, c, __G_h, len, width)
+                        ,* h**-2
+                        ,* discrete_G_weigted_neigbour_sum(i, j, c, __G_h, len, width)
                         + h**-2 * bordernumber * x
                         + alpha * x
                         - alpha * phase[i, j]
@@ -353,14 +381,14 @@ def elyptical_PDE_solver(
 #+end_src
 
 as input we use [[fig:dots]]:
-#+begin_src python :results graphics file output :eval never-export :session :file elyps.png :exports both
-import testUtils as tu
-import seaborn as sns
-import matplotlib.pyplot as plt
+#+begin_src python :results graphics file output :eval never-export :file elyps.png :exports both
+<<imports>>
 from multi_solver_relaxed import CH_2D_Multigrid_Solver_relaxed , test_solver , plot
-test_phase = tu.k_spheres_phase(15, 50, size=265)
+<<elyptical_PDE_solver>>
+test_phase = tu.k_spheres_phase(15, 10, size=64)
 t = test_solver(test_phase)
-t.solve_elyps(10000)
+t.elyps_solver = elyptical_PDE_solver
+t.solve_elyps(100)
 sns.heatmap(t.c)
 plt.plot()
 #+end_src
@@ -370,6 +398,119 @@ plt.plot()
 
 **** Proposal2 Analytical solver
 solving [[eq:discrete_elyps]] for \(c_{ij}^\alpha \) then results in.
+\begin{align*}
+\left( \frac{\Sigma_{G}}{h^2} + \alpha \right)c_{ij}^{\alpha} = \alpha\phi^{\alpha}_{ij} + \frac{\Sigma_G c_{ij}^{\alpha}}{h^2}
+\end{align*}
+and can be translated to code as follows
+#+name: elyptical_PDE_solver_2
+#+begin_src python
+@njit
+def elyps_solver(
+    c: NDArray[np.float64],
+    phase: NDArray[np.float64],
+    len: int,
+    width: int,
+    alpha: float,
+    h: float,
+    n: int,
+) -> NDArray[np.float64]:
+    for k in range(n):
+        for i in range(1, len + 1):
+            for j in range(1, width + 1):
+                bordernumber = neighbours_in_domain(i, j, len, width)
+
+                c[i, j] = (
+                    -1* alpha * phase[i, j]
+                    + discrete_G_weigted_neigbour_sum(i, j, c, __G_h, len, width)
+                    / h**2
+                ) / (bordernumber / h**2 + alpha)
+    return c
+#+end_src
+
+#+RESULTS: elyptical_PDE_solver_2
+
+and looks like
+#+begin_src python :results file graphics output :file analytical_elyps.png
+<<imports>>
+from multi_solver_relaxed import CH_2D_Multigrid_Solver_relaxed , test_solver , plot
+<<elyptical_PDE_solver_2>>
+test_phase = tu.k_spheres_phase(15, 10, size=64)
+t = test_solver(test_phase)
+t.elyps_solver = elyps_solver
+t.alpha = 1001
+t.solve_elyps(100)
+sns.heatmap(t.c)
+plt.plot()
+#+end_src
+
+#+RESULTS:
+[[file:analytical_elyps.png]]
+
+
+#+begin_src python :results file graphics output :file diffrence_elyps.png :session aig
+<<imports>>
+from multi_solver_relaxed import CH_2D_Multigrid_Solver_relaxed , test_solver , plot
+<<elyptical_PDE_solver_2>>
+test_phase = tu.k_spheres_phase(15, 10, size=64)
+t = test_solver(test_phase)
+t.elyps_solver = elyps_solver
+t.alpha = 1001
+t.solve_elyps(40)
+prev  = np.array(t.c)
+t.solve_elyps(1)
+sns.heatmap(t.c - prev)
+plt.plot()
+#+end_src
+
+#+RESULTS:
+[[file:diffrence_elyps.png]]
+
+**** Proposal 4
+as the solver still exhibits unexpected behaviour, ie. it doesn't seem to converge wit higher iterations, we propose a relaxation by interpolating the new value of \(  c_{ij}^\alpha \) with the old one
+#+name: elyptical_PDE_solver_relaxed
+#+begin_src python
+@njit
+def elyps_solver(
+    c: NDArray[np.float64],
+    phase: NDArray[np.float64],
+    len: int,
+    width: int,
+    alpha: float,
+    h: float,
+    n: int,
+    delta = 0.9
+) -> NDArray[np.float64]:
+    for k in range(n):
+        for i in range(1, len + 1):
+            for j in range(1, width + 1):
+                bordernumber = neighbours_in_domain(i, j, len, width)
+
+                c_new = (
+                    alpha * phase[i, j]
+                    + discrete_G_weigted_neigbour_sum(i, j, c, __G_h, len, width)
+                    / h**2
+                ) / (bordernumber / h**2 + alpha)
+                c[i,j] = c[i,j] * delta + (1-delta) * c_new
+
+    return c
+#+end_src
+
+#+begin_src python :results file graphics output :file relaxed_elyps.png :session rel
+<<imports>>
+from multi_solver_relaxed import CH_2D_Multigrid_Solver_relaxed , test_solver , plot
+<<elyptical_PDE_solver_relaxed>>
+test_phase = tu.k_spheres_phase(15, 10, size=64)
+t = test_solver(test_phase)
+t.elyps_solver = elyps_solver
+t.alpha = 1001
+t.solve_elyps(10000)
+sns.heatmap(t.c)
+plt.plot()
+#+end_src
+
+#+RESULTS:
+[[file:relaxed_elyps.png]]
+
 * References
 #+PRINT_BIBLIOGRAPHY:
 #  LocalWords:  Discretization

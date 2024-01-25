@@ -1,15 +1,11 @@
 import seaborn as sns
 import matplotlib.pyplot as plt
 
-import math
 import numpy as np
 from numba import njit
 import testUtils as tu
 
-import scipy.optimize as sp
 from numpy.typing import NDArray
-
-import numba as nb
 
 from typing import Tuple, NamedTuple
 from multi_solver import (
@@ -89,12 +85,16 @@ def elyps_solver(
     h: float,
     n: int,
 ) -> NDArray[np.float64]:
-    maxiter = 100
-    tol = 1.48e-8
     for k in range(n):
         for i in range(1, len + 1):
             for j in range(1, width + 1):
                 bordernumber = neighbours_in_domain(i, j, len, width)
+
+                c[i, j] = (
+                    alpha * phase[i, j]
+                    + discrete_G_weigted_neigbour_sum(i, j, c, __G_h, len, width)
+                    / h**2
+                ) / (bordernumber / h**2 + alpha)
     return c
 
 
@@ -233,6 +233,7 @@ class CH_2D_Multigrid_Solver_relaxed:
         self.psi = np.zeros(self.phase_small.shape)
         self.alpha = 11
         self.c = np.zeros(self.phase_small.shape)
+        self.elyps_solver = alternative_el_solver
         pass
 
     def __str__(self) -> str:
@@ -507,7 +508,7 @@ class CH_2D_Multigrid_Solver_relaxed:
         )
 
     def solve_elyps(self, n: int) -> None:
-        self.c = alternative_el_solver(
+        self.c = self.elyps_solver(
             self.c,
             self.phase_small,
             self.len_small,
