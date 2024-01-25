@@ -19,6 +19,10 @@ def plot(path: str, dir: str, savedir: str) -> None:
         print(f"Shape of data: {phase_data.shape}")
         if not os.path.exists(imgpath):
             os.mkdir(imgpath)
+        else:
+            print("Cleaning old images")
+            for x in os.listdir(imgpath):
+                os.remove(f"{imgpath}/{x}")
         print(d)
         for i in range(phase_data.shape[0]):
             print(f"Saving image {i+1}/{phase_data.shape[0]}")

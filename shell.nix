@@ -27,6 +27,7 @@ let
       #   ];
       # })
       tqdm
+      gitpython
 
       # Dev  deps
       debugpy
