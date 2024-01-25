@@ -140,7 +140,7 @@ def SMOOTH_jit(
     adaptive: bool = True,
 ) -> Tuple[np.ndarray, np.ndarray]:
     for k in range(v):
-        old_phase = phase_small
+        old_phase = np.array(phase_small)
         for i in range(1, len_small + 1):
             for j in range(1, width_small + 1):
                 bordernumber = (
@@ -304,7 +304,7 @@ class CH_2D_Multigrid_Solver:
             self.len_small,
             self.width_small,
             v,
-            adaptive=False,
+            adaptive=True,
         )
         pass
 
