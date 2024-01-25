@@ -18,6 +18,7 @@ numba = "^0.58.1"
 scipy = "^1.11.3"
 numba-scipy="*"
 tqdm = "*"
+gitpython = "^3.1.41"
 
 [tool.poetry.dev-dependencies]
 pydantic = "*"
