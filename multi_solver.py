@@ -140,7 +140,7 @@ def SMOOTH_jit(
     adaptive: bool = True,
 ) -> Tuple[np.ndarray, np.ndarray]:
     for k in range(v):
-        old_phase = np.array(phase_small)
+        old_phase = phase_small.copy()
         for i in range(1, len_small + 1):
             for j in range(1, width_small + 1):
                 bordernumber = (
@@ -410,8 +410,8 @@ class CH_2D_Multigrid_Solver:
 
     def v_cycle(self, iterations: int) -> None:
         for i in range(iterations):
-            old_phase = self.phase_small
-            self.SMOOTH(40)
+            old_phase = self.phase_small.copy()
+            self.SMOOTH(400)
 
             # extract (d,r) as array operations
 
@@ -468,10 +468,10 @@ class CH_2D_Multigrid_Solver:
             self.phase_small = self.phase_small + u_small
             self.mu_small = self.mu_small + v_small
             # smooth again:
-            self.SMOOTH(80)
+            self.SMOOTH(800)
 
             # print(f"change in phase: {np.linalg.norm(old_phase - self.phase_small)}")
-            if np.linalg.norm(old_phase - self.phase_small) < 1e-4:
+            if np.linalg.norm(old_phase - self.phase_small) < 1e-14:
                 break
         pass
 
