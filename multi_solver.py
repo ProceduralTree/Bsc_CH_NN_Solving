@@ -476,7 +476,10 @@ class CH_2D_Multigrid_Solver:
 
             # print(f"change in phase: {np.linalg.norm(old_phase - self.phase_small)}")
             if np.linalg.norm(old_phase - self.phase_small) < 1e-14:
+<<<<<<< HEAD
                 print(f"v_cycle Iterations: {iterations}")
+=======
+>>>>>>> origin/main
                 break
         pass
 
