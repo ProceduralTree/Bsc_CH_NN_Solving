@@ -1,6 +1,6 @@
 #+title: Testing
-
-*  Input testing
+#+property: header-args:python :noweb strip-export
+* Input testing
 using epsilon from paper:
 \begin{align*}
 \varepsilon &=\frac{mh}{2 \sqrt{2} \tan^{-1}{0.9}}
@@ -8,27 +8,32 @@ using epsilon from paper:
 
 
 #+name: inputs
-|   dt |     m |    h |      epsilon |
-|------+-------+------+--------------|
-| 1e-3 | 15000 | 1e-3 |   0.12630752 |
-| 1e-2 |    30 | 1e-2 | 2.5261505e-3 |
-| 1e-1 |     3 | 1e-1 | 2.5261505e-3 |
-| 1e-3 |    30 | 1e-2 | 2.5261505e-3 |
+|   dt |   m |    h |      epsilon |
+|------+-----+------+--------------|
+| 1e-3 | 150 | 1e-3 | 1.2630752e-3 |
+| 1e-2 |  30 | 1e-2 | 2.5261505e-3 |
+| 1e-1 |   3 | 1e-1 | 2.5261505e-3 |
+| 1e-3 |  30 | 1e-2 | 2.5261505e-3 |
 #+TBLFM: @2$4..@>$4=($2 * $3)/( 2  * sqrt(2) * arctan(0.9) )
-
-#+begin_src python :tangle testing/test.py :results file graphics output :file testing/images/smooth.png :var testinputs=inputs  :session test
+* Test solver:
+#+name: solver
+#+begin_src python :var testinputs=inputs :results silent
 import numpy as np
 from multi_solver import CH_2D_Multigrid_Solver
 import testUtils as tu
 import seaborn as sns
 import matplotlib.pyplot as plt
 
-testphase = tu.k_spheres_phase(10, 50, size=256)
+testphase = tu.k_spheres_phase(10, 5, size=16)
 testinputs = testinputs[0]
-print(testinputs)
 testsolver = CH_2D_Multigrid_Solver(
     tu.wprime, testphase, testinputs[0], testinputs[2], testinputs[3]
 )
+#+end_src
+
+* SMOOTH
+#+begin_src python :tangle testing/test.py :results file graphics output :file testing/images/smooth.png :var testinputs=inputs
+<<solver>>
 testsolver.set_xi_and_psi()
 testsolver.SMOOTH(10)
 sns.heatmap(testsolver.phase_small)
@@ -37,26 +42,17 @@ sns.heatmap(testsolver.phase_small)
 #+RESULTS:
 [[file:testing/images/smooth.png]]
 
-
+* GIF
 #+begin_src python :var testinputs=inputs :tangle testing/test.py :results output :async :session python
-import numpy as np
-from multi_solver import CH_2D_Multigrid_Solver
-import testUtils as tu
-import os
 import git
-
+<<solver>>
 repo = git.Repo('.', search_parent_directories=True)
 path = repo.working_tree_dir
 print(path)
-testinputs = testinputs[0]
-testphase = tu.k_spheres_phase(10, 50, size=265)
-testsolver = CH_2D_Multigrid_Solver(
-    tu.wprime, testphase, testinputs[0], testinputs[2], testinputs[3]
-)
 phases = []
 mus = []
 for i in range(4):
-    testsolver.solve(1, 100)
+    testsolver.solve(1, 10)
     phases += [testsolver.phase_small]
     mus += [testsolver.mu_small]
 
@@ -64,7 +60,7 @@ np.savez(f"{path}/testing/data/testdata", phase=phases , mu=mus )
 #+end_src
 
 #+RESULTS:
-: 304829d3-bfcb-4f7e-9948-a0c02090fd3f
+: /home/proceduraltree/Projects/Bsc_CH_NN_Solving
 
 #+begin_src python :tangle testing/test.py :results output
 import os
@@ -77,23 +73,38 @@ plot(f"{path}/testing", "data", "images")
 #+end_src
 
 #+RESULTS:
+#+begin_example
+['testdata']
+Shape of data: (4, 66, 66)
+Cleaning old images
+testdata
+Saving image 1/4
+Saving image 2/4
+Saving image 3/4
+Saving image 4/4
+Generating GIF
+
+#+end_example
 
 
 [[file:./testing/images/testdata.gif]]
 
 #+begin_src python :results graphics file :file testing/images/testdata.gif
 import os
-path = "/home/jon/Projects/Bsc_CH_NN_Solving/testing"
+import git
+
+repo = git.Repo('.', search_parent_directories=True)
+path = repo.working_tree_dir
 
 savedir = "images"
 d = "testdata"
 os.system(
-    f"convert -layers OptimizePlus -delay 1x24 -quality 99 {path}/{savedir}/{d}/*.png -loop 0 {path}/{savedir}/{d}.gif"
+    f"convert -layers OptimizePlus -delay 1x24 -quality 99 {path}/testing/{savedir}/{d}/*.png -loop 0 {path}/testing/{savedir}/{d}.gif"
 )
 #+end_src
 
 #+RESULTS:
-: None
+[[file:testing/images/testdata.gif]]
 
 
 #+begin_src python :results output
@@ -106,3 +117,16 @@ print(f"{path}/data")
 
 #+RESULTS:
 : /home/proceduraltree/Projects/Bsc_CH_NN_Solving/data
+
+* V_cycle
+#+begin_src python :tangle testing/test.py :results graphics file output :file v_cycle.png :var testinputs=inputs
+<<solver>>
+testsolver.set_xi_and_psi()
+testsolver.v_cycle(10)
+old_v = testsolver.phase_small.copy()
+testsolver.v_cycle(10)
+sns.heatmap(testsolver.phase_small - old_v)
+#+end_src
+
+#+RESULTS:
+[[file:v_cycle.png]]

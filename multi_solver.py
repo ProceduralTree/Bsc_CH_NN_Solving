@@ -1,5 +1,8 @@
 #!/usr/bin/env python3
 
+import seaborn as sns
+import matplotlib.pyplot as plt
+
 
 from numba import njit
 from numba.experimental import jitclass
@@ -179,7 +182,8 @@ def SMOOTH_jit(
                 phase_small[i, j] = res[0]
                 mu_small[i, j] = res[1]
 
-        if adaptive and np.linalg.norm(old_phase - phase_small) < 1e-14:
+        if adaptive and np.linalg.norm(old_phase - phase_small) < 1e-10:
+            print(f"SMOOTH terminated at {k} succesfully")
             break
 
     return (phase_small, mu_small)
@@ -472,6 +476,7 @@ class CH_2D_Multigrid_Solver:
 
             # print(f"change in phase: {np.linalg.norm(old_phase - self.phase_small)}")
             if np.linalg.norm(old_phase - self.phase_small) < 1e-14:
+                print(f"v_cycle Iterations: {iterations}")
                 break
         pass
 
@@ -525,3 +530,13 @@ class CH_2D_Multigrid_Solver:
         return Interpolate(
             array, self.len_large, self.width_large, self.len_small, self.width_small
         )
+
+
+def test_solver(phase: NDArray[float]) -> CH_2D_Multigrid_Solver:
+    solver = CH_2D_Multigrid_Solver(tu.wprime, phase, 1e-3, 1e-3, 1e-2)
+    return solver
+
+
+def plot(arr: NDArray[np.float64]) -> None:
+    sns.heatmap(arr)
+    plt.show()
